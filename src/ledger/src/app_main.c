@@ -168,7 +168,7 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
                 THROW(APDU_CODE_CLA_NOT_SUPPORTED);
             }
 
-            if (rx<5) {
+            if (rx < 5) {
                 THROW(APDU_CODE_WRONG_LENGTH);
             }
 
@@ -187,7 +187,7 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
                 break;
             }
 
-            case INS_PUBLIC_KEY_SECP256K1: {
+            case INS_PUBLIC_KEY_ED25519: {
                 if (!extractBip32(&bip32_depth, bip32_path, rx, OFFSET_DATA)) {
                     THROW(APDU_CODE_DATA_INVALID);
                 }
@@ -198,20 +198,22 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
 
                 // Generate keys
                 os_perso_derive_node_bip32(
-                    CX_CURVE_256K1,
+                    CX_CURVE_Ed25519,
                     bip32_path, bip32_depth,
                     privateKeyData, NULL);
-                keys_secp256k1(&publicKey, &privateKey, privateKeyData);
+                keys_ed25519(&publicKey, &privateKey, privateKeyData);
                 memset(privateKeyData, 0, 32);
 
-                os_memmove(G_io_apdu_buffer, publicKey.W, 65);
-                *tx += 65;
+                unsigned char output[32];
+                extractPubKey(output, &publicKey);
+                os_memmove(G_io_apdu_buffer, output, sizeof(output));
+                *tx += sizeof(output);
 
                 THROW(APDU_CODE_OK);
             }
 
-            case INS_SIGN_SECP256K1: {
-                current_sigtype = SECP256K1;
+            case INS_SIGN_ED25519: {
+                current_sigtype = ED25519;
                 if (!process_chunk(tx, rx, true))
                     THROW(APDU_CODE_OK);
 
@@ -219,160 +221,23 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
                 if (error_msg != NULL) {
                     int error_msg_length = strlen(error_msg);
                     os_memmove(G_io_apdu_buffer, error_msg, error_msg_length);
-                    *tx += (error_msg_length);
-                    THROW(APDU_CODE_BAD_KEY_HANDLE);
+                    *tx += sizeof(error_msg_length);
+                    // FIXME: We need proper error code for this.
+                    THROW(APDU_CODE_DATA_INVALID);
                 }
+
+                // TODO: Sign without any verification
                 view_add_update_transaction_info_event_handler(&transaction_get_display_key_value);
                 view_display_transaction_menu(transaction_get_display_pages());
 
                 *flags |= IO_ASYNCH_REPLY;
-                break;
             }
-
-#ifdef FEATURE_ED25519
-                case INS_PUBLIC_KEY_ED25519: {
-                    if (!extractBip32(&bip32_depth, bip32_path, rx, OFFSET_DATA)) {
-                        THROW(APDU_CODE_DATA_INVALID);
-                    }
-
-                    cx_ecfp_public_key_t publicKey;
-                    cx_ecfp_private_key_t privateKey;
-                    uint8_t privateKeyData[32];
-
-                    // Generate keys
-                    os_perso_derive_node_bip32(
-                            CX_CURVE_Ed25519,
-                            bip32_path, bip32_depth,
-                            privateKeyData, NULL);
-                    keys_ed25519(&publicKey, &privateKey, privateKeyData);
-                    memset(privateKeyData, 0, 32);
-
-                    unsigned char output[32];
-                    extractPubKey(output, &publicKey);
-                    os_memmove(G_io_apdu_buffer, output, sizeof(output));
-                    *tx += sizeof(output);
-
-                    THROW(APDU_CODE_OK);
-                }
-
-                case INS_SIGN_ED25519: {
-                    current_sigtype = ED25519;
-                    if (!process_chunk(tx, rx, true))
-                        THROW(APDU_CODE_OK);
-
-                    const char* error_msg = transaction_parse();
-                    if (error_msg != NULL) {
-                        int error_msg_length = strlen(error_msg);
-                        os_memmove(G_io_apdu_buffer, error_msg, error_msg_length);
-                        *tx += sizeof(error_msg_length);
-                        // FIXME: We need proper error code for this.
-                        THROW(APDU_CODE_DATA_INVALID);
-                    }
-                    view_add_update_transaction_info_event_handler(&transaction_get_display_key_value);
-                    view_display_transaction_menu(transaction_get_display_pages());
-
-                    *flags |= IO_ASYNCH_REPLY;
-                }
-                    break;
-#endif
-
-#ifdef TESTING_ENABLED
-                case INS_HASH_TEST: {
-                    if (process_chunk(tx, rx, false)) {
-                        uint8_t message_digest[CX_SHA256_SIZE];
-
-                        cx_hash_sha256(transaction_get_buffer(),
-                                       transaction_get_buffer_length(),
-                                       message_digest,
-                                       CX_SHA256_SIZE);
-
-                        os_memmove(G_io_apdu_buffer, message_digest, CX_SHA256_SIZE);
-                        *tx += 32;
-                    }
-                    THROW(APDU_CODE_OK);
-                }
                 break;
 
-                case INS_PUBLIC_KEY_SECP256K1_TEST: {
-                    // Generate key
-                    cx_ecfp_public_key_t publicKey;
-                    cx_ecfp_private_key_t privateKey;
-                    keys_secp256k1(&publicKey, &privateKey, privateKeyDataTest );
-
-                    os_memmove(G_io_apdu_buffer, publicKey.W, 65);
-                    *tx += 65;
-
-                    THROW(APDU_CODE_OK);
-                }
+            case INIT_VALIDATOR:
+                // TODO: Get values and ask for verification
+                THROW(APDU_CODE_OK);
                 break;
-
-                case INS_SIGN_SECP256K1_TEST: {
-                    if (process_chunk(tx, rx, false)) {
-
-                        unsigned int length = 0;
-
-                        // Generate keys
-                        cx_ecfp_public_key_t publicKey;
-                        cx_ecfp_private_key_t privateKey;
-                        keys_secp256k1(&publicKey, &privateKey, privateKeyDataTest );
-
-                        // Skip UI and validation
-                        sign_secp256k1(
-                                transaction_get_buffer(),
-                                transaction_get_buffer_length(),
-                                G_io_apdu_buffer,
-                                IO_APDU_BUFFER_SIZE,
-                                &length,
-                                &privateKey);
-
-                        *tx += length;
-                    }
-                    THROW(APDU_CODE_OK);
-                }
-                break;
-
-#ifdef FEATURE_ED25519
-                case INS_PUBLIC_KEY_ED25519_TEST: {
-                    // Generate key
-                    cx_ecfp_public_key_t publicKey;
-                    cx_ecfp_private_key_t privateKey;
-                    keys_ed25519(&publicKey, &privateKey, privateKeyDataTest);
-
-                    unsigned char output[32];
-                    extractPubKey(output, &publicKey);
-                    os_memmove(G_io_apdu_buffer, output, sizeof(output));
-                    *tx += sizeof(output);
-
-                    THROW(APDU_CODE_OK);
-                }
-                break;
-
-                case INS_SIGN_ED25519_TEST: {
-                    if (process_chunk(tx, rx, false)) {
-
-                        // Generate keys
-                        cx_ecfp_public_key_t publicKey;
-                        cx_ecfp_private_key_t privateKey;
-                        keys_ed25519(&publicKey, &privateKey, privateKeyDataTest );
-
-                        unsigned int length = 0;
-
-                        // Skip UI and validation
-                        sign_ed25519(
-                                transaction_get_buffer(),
-                                transaction_get_buffer_length(),
-                                G_io_apdu_buffer,
-                                IO_APDU_BUFFER_SIZE,
-                                &length,
-                                &privateKey);
-
-                        *tx += length;
-                    }
-                    THROW(APDU_CODE_OK);
-                }
-                break;
-#endif
-#endif
 
             default:THROW(APDU_CODE_INS_NOT_SUPPORTED);
             }
@@ -416,16 +281,16 @@ void sign_transaction() {
     unsigned int length = 0;
     int result = 0;
     switch (current_sigtype) {
-    case SECP256K1:
+    case ED25519:
         os_perso_derive_node_bip32(
-            CX_CURVE_256K1,
+            CX_CURVE_Ed25519,
             bip32_path, bip32_depth,
             privateKeyData, NULL);
 
-        keys_secp256k1(&publicKey, &privateKey, privateKeyData);
+        keys_ed25519(&publicKey, &privateKey, privateKeyData);
         memset(privateKeyData, 0, 32);
 
-        result = sign_secp256k1(
+        result = sign_ed25519(
             transaction_get_buffer(),
             transaction_get_buffer_length(),
             G_io_apdu_buffer,
@@ -433,25 +298,6 @@ void sign_transaction() {
             &length,
             &privateKey);
         break;
-#ifdef FEATURE_ED25519
-        case ED25519:
-            os_perso_derive_node_bip32(
-                    CX_CURVE_Ed25519,
-                    bip32_path, bip32_depth,
-                    privateKeyData, NULL);
-
-            keys_ed25519(&publicKey, &privateKey, privateKeyData);
-            memset(privateKeyData, 0, 32);
-
-            result = sign_ed25519(
-                    transaction_get_buffer(),
-                    transaction_get_buffer_length(),
-                    G_io_apdu_buffer,
-                    IO_APDU_BUFFER_SIZE,
-                    &length,
-                    &privateKey);
-            break;
-#endif
     }
     if (result == 1) {
         set_code(G_io_apdu_buffer, length, APDU_CODE_OK);
