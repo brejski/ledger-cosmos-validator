@@ -1,61 +1,22 @@
-Transaction Specification
+Message Specification
 -------------------------
 
 ### Format
 
-Transactions passed to the Ledger device will be in the following format. The Ledger device MUST accept any transaction (valid as below) in this format.
+Messages passed to the Ledger device will be in the following format. The Ledger device MUST accept any transaction (valid as below) in this format.
+
+```diff
++ WARNING: This is work in progress, the format is expected to change
+```
+
 
 ```json
 {
-  "account_number": {number},
-  "chain_id": {string},
-  "fee": {
-    "amount": [{"amount": {number}, "denom": {string}}, ...],
-    "gas": {number}
-  },
-  "memo": {string},
-  "msgs": [{arbitrary}],
-  "sequence": {number}
+  "block": {number},
+  "height": {number},
+  "other": {string},
 }
 ```
-
-`msgs` is a list of messages, which are arbitrary JSON structures.
-
-#### Examples
-
-```json
-```
-
-```json
-```
-
-#### Display Logic
-
-The Ledger device SHOULD pick a suitable display representation for the transaction.
-
-The key type (secp256k1 / ed25519), `chain_id`, `account_number`, `sequence`, `fee`, and `memo` should be displayed in that order, each on their own page, autoscrolling if necessary.
-
-`msgs` should be iterated through and each displayed according to the following recursive logic:
-
-```
-display (json, level)
-  if level == 2
-    show value as json-encoded string
-  else
-    switch typeof(json) {
-      case object:
-        for (key, value) in object:
-          show key
-          display(value, level + 1)
-      case array:
-        for element in array:
-          display(element, level + 1)
-      otherwise:
-        show value as json-encoded string
-    }
-```
-
-starting at level 0, e.g. `display(msgs[0], 0)`.
 
 ### Validation
 

@@ -1,4 +1,4 @@
-# Cosmos App - Ledger Nano S
+# Cosmos Validator App - Ledger Nano S
 ## General structure
 
 The general structure of commands and responses is as follows:
@@ -60,7 +60,7 @@ The general structure of commands and responses is as follows:
 | PATCH   | byte (1) | Version Patch |                                 |
 | SW1-SW2 | byte (2) | Return code   | see list of return codes        |
 
-### PUBLIC_KEY_SECP256K1
+### PUBLIC_KEY_ED25519
 
 #### Command
 
@@ -79,7 +79,46 @@ The general structure of commands and responses is as follows:
 | PK      | byte (65) | Public Key    |  |
 | SW1-SW2 | byte (2)  | Return code   | see list of return codes        |
 
-### SIGN_SECP256K1
+### SIGN_ED25519
+
+This command needs to be called several times until the complete message has been uploaded.
+The validator app will implement double-sign prevention. 
+
+Based on these values, the app will not sign anything that is:
+- A lower height
+- A lower round
+
+The HSM keeps in RAM:
+- Latest height
+- Latest round
+
+Signing does not work unless these two values have been initialized via API + confirmation by the user. See **INIT_VALIDATOR**
+
+
+#### Command
+
+| Field | Type     | Content                | Expected |
+| ----- | -------- | ---------------------- | -------- |
+| CLA   | byte (1) | Application Identifier | 0x55     |
+| INS   | byte (1) | Instruction ID         | 0x03     |
+| P1    | byte (1) | Packet Current Index   | ignored  |
+| P2    | byte (1) | Packet Total Count     | ignored  |
+| L     | byte (1) | Bytes in payload       | 0        |
+
+#### Response
+
+| Field   | Type      | Content       | Note                            |
+| ------- | --------- | ------------- | ------------------------------- |
+| SIG     | byte (64) | Signature     |  |
+| SW1-SW2 | byte (2)  | Return code   | see list of return codes        |
+
+### INIT_VALIDATOR
+
+This command allows the KMS to initialize:
+- latest height
+- latest round
+
+This command requires manual confirmation (double click).
 
 #### Command
 

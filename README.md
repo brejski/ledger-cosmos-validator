@@ -1,8 +1,8 @@
-# Ledger-cosmos
+# Ledger-cosmos-validator
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![CircleCI](https://circleci.com/gh/cosmos/ledger-cosmos/tree/master.svg?style=shield)](https://circleci.com/gh/cosmos/ledger-cosmos/tree/master)
+[![CircleCI](https://circleci.com/gh/ZondaX/ledger-cosmos-validator/tree/master.svg?style=shield)](https://circleci.com/gh/ZondaX/ledger-cosmos-validator/tree/master)
 
-This is a prototype of the Ledger Nano S app for Tendermint/Cosmos. 
+This is a prototype of the Ledger Nano S validator app for Tendermint/Cosmos. 
 
 It is work in progress and subject to further modifications and testing.
 
