@@ -18,31 +18,31 @@
 #include "transaction_parser.h"
 #include "os.h"
 
-void transaction_initialize();
-
-/// Clears the transaction buffer
-void transaction_reset();
-
-/// Appends buffer to the end of the current transaction buffer
-/// Transaction buffer will grow until it reaches the maximum allowed size
-/// \param buffer
-/// \param length
-void transaction_append(unsigned char *buffer,
-                        uint32_t length);
-
-/// Returns size of the raw json transaction buffer
-/// \return
-uint32_t transaction_get_buffer_length();
-
-/// Returns the raw json transaction buffer
-/// \return
-uint8_t* transaction_get_buffer();
-
-/// Parse json message stored in transaction buffer
-/// This function should be called as soon as full buffer data is loaded.
-/// \return It returns NULL if json is valid or error message otherwise.
-const char* transaction_parse();
-
-/// Returns parsed representation of the transaction message
-/// \return
-parsed_json_t *transaction_get_parsed();
+//void transaction_initialize();
+//
+///// Clears the transaction buffer
+//void transaction_reset();
+//
+///// Appends buffer to the end of the current transaction buffer
+///// Transaction buffer will grow until it reaches the maximum allowed size
+///// \param buffer
+///// \param length
+//void transaction_append(unsigned char *buffer,
+//                        uint32_t length);
+//
+///// Returns size of the raw json transaction buffer
+///// \return
+//uint32_t transaction_get_buffer_length();
+//
+///// Returns the raw json transaction buffer
+///// \return
+//uint8_t* transaction_get_buffer();
+//
+///// Parse json message stored in transaction buffer
+///// This function should be called as soon as full buffer data is loaded.
+///// \return It returns NULL if json is valid or error message otherwise.
+//const char* transaction_parse();
+//
+///// Returns parsed representation of the transaction message
+///// \return
+//parsed_json_t *transaction_get_parsed();
