@@ -17,7 +17,7 @@
 
 #include "app_main.h"
 #include "view.h"
-#include "transaction.h"
+#include "validation.h"
 #include "signature.h"
 
 #include <os_io_seproxyhal.h>
@@ -142,8 +142,8 @@ bool process_chunk(volatile uint32_t *tx, uint32_t rx, bool getBip32) {
     }
 
     if (packageIndex == 1) {
-        transaction_initialize();
-        transaction_reset();
+        validation_initialize();
+        validation_reset();
         if (getBip32) {
             if (!extractBip32(&bip32_depth, bip32_path, rx, OFFSET_DATA)) {
                 THROW(APDU_CODE_DATA_INVALID);
@@ -152,7 +152,7 @@ bool process_chunk(volatile uint32_t *tx, uint32_t rx, bool getBip32) {
         }
     }
 
-    transaction_append(&(G_io_apdu_buffer[offset]), rx - offset);
+    validation_append(&(G_io_apdu_buffer[offset]), rx - offset);
 
     return packageIndex == packageCount;
 }
@@ -213,11 +213,32 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
             }
 
             case INS_SIGN_ED25519: {
-                current_sigtype = ED25519;
-                if (!process_chunk(tx, rx, true))
-                    THROW(APDU_CODE_OK);
+//                current_sigtype = ED25519;
+//                if (!process_chunk(tx, rx, true))
+//                    THROW(APDU_CODE_OK);
+//
+//                const char *error_msg = transaction_parse();
+//                if (error_msg != NULL) {
+//                    int error_msg_length = strlen(error_msg);
+//                    os_memmove(G_io_apdu_buffer, error_msg, error_msg_length);
+//                    *tx += sizeof(error_msg_length);
+//                    // FIXME: We need proper error code for this.
+//                    THROW(APDU_CODE_DATA_INVALID);
+//                }
+//
+//                // TODO: Sign without any verification
+//                view_add_update_transaction_info_event_handler(&transaction_get_display_key_value);
+//                view_display_transaction_menu(transaction_get_display_pages());
+//
+//                *flags |= IO_ASYNCH_REPLY;
+            }
+                break;
 
-                const char *error_msg = transaction_parse();
+            case INIT_VALIDATOR:
+                if (!process_chunk(tx, rx, true)) {
+                    THROW(APDU_CODE_OK);
+                }
+                const char *error_msg = validation_parse();
                 if (error_msg != NULL) {
                     int error_msg_length = strlen(error_msg);
                     os_memmove(G_io_apdu_buffer, error_msg, error_msg_length);
@@ -226,15 +247,8 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
                     THROW(APDU_CODE_DATA_INVALID);
                 }
 
-                // TODO: Sign without any verification
-                view_add_update_transaction_info_event_handler(&transaction_get_display_key_value);
-                view_display_transaction_menu(transaction_get_display_pages());
-
-                *flags |= IO_ASYNCH_REPLY;
-            }
-                break;
-
-            case INIT_VALIDATOR:
+                // Add parsing for the message
+                // Extract height and something else
                 // TODO: Get values and ask for verification
                 THROW(APDU_CODE_OK);
                 break;
@@ -266,55 +280,55 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
     END_TRY;
 }
 
-void reject_transaction() {
-    set_code(G_io_apdu_buffer, 0, APDU_CODE_COMMAND_NOT_ALLOWED);
-    io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, 2);
-    view_idle(0);
-}
-
-void sign_transaction() {
-    // Generate keys
-    cx_ecfp_public_key_t publicKey;
-    cx_ecfp_private_key_t privateKey;
-    uint8_t privateKeyData[32];
-
-    unsigned int length = 0;
-    int result = 0;
-    switch (current_sigtype) {
-    case ED25519:
-        os_perso_derive_node_bip32(
-            CX_CURVE_Ed25519,
-            bip32_path, bip32_depth,
-            privateKeyData, NULL);
-
-        keys_ed25519(&publicKey, &privateKey, privateKeyData);
-        memset(privateKeyData, 0, 32);
-
-        result = sign_ed25519(
-            transaction_get_buffer(),
-            transaction_get_buffer_length(),
-            G_io_apdu_buffer,
-            IO_APDU_BUFFER_SIZE,
-            &length,
-            &privateKey);
-        break;
-    }
-    if (result == 1) {
-        set_code(G_io_apdu_buffer, length, APDU_CODE_OK);
-        io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, length + 2);
-        view_display_signing_success();
-    } else {
-        set_code(G_io_apdu_buffer, length, APDU_CODE_SIGN_VERIFY_ERROR);
-        io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, length + 2);
-        view_display_signing_error();
-    }
-}
+//void reject_transaction() {
+//    set_code(G_io_apdu_buffer, 0, APDU_CODE_COMMAND_NOT_ALLOWED);
+//    io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, 2);
+//    view_idle(0);
+//}
+//
+//void sign_transaction() {
+//    // Generate keys
+//    cx_ecfp_public_key_t publicKey;
+//    cx_ecfp_private_key_t privateKey;
+//    uint8_t privateKeyData[32];
+//
+//    unsigned int length = 0;
+//    int result = 0;
+//    switch (current_sigtype) {
+//    case ED25519:
+//        os_perso_derive_node_bip32(
+//            CX_CURVE_Ed25519,
+//            bip32_path, bip32_depth,
+//            privateKeyData, NULL);
+//
+//        keys_ed25519(&publicKey, &privateKey, privateKeyData);
+//        memset(privateKeyData, 0, 32);
+//
+//        result = sign_ed25519(
+//            transaction_get_buffer(),
+//            transaction_get_buffer_length(),
+//            G_io_apdu_buffer,
+//            IO_APDU_BUFFER_SIZE,
+//            &length,
+//            &privateKey);
+//        break;
+//    }
+//    if (result == 1) {
+//        set_code(G_io_apdu_buffer, length, APDU_CODE_OK);
+//        io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, length + 2);
+//        view_display_signing_success();
+//    } else {
+//        set_code(G_io_apdu_buffer, length, APDU_CODE_SIGN_VERIFY_ERROR);
+//        io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, length + 2);
+//        view_display_signing_error();
+//    }
+//}
 
 void app_main() {
     volatile uint32_t rx = 0, tx = 0, flags = 0;
 
-    view_add_reject_transaction_event_handler(&reject_transaction);
-    view_add_sign_transaction_event_handler(&sign_transaction);
+    //view_add_reject_transaction_event_handler(&reject_transaction);
+    //view_add_sign_transaction_event_handler(&sign_transactio§§  n);
 
     for (;;) {
         volatile uint16_t sw = 0;
