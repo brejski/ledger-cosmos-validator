@@ -16,6 +16,7 @@
 
 #include <jsmn.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "validation_parser.h"
 #include "json_parser.h"
 
@@ -135,37 +136,68 @@ int dictionaries_sorted(parsed_json_t* parsed_transaction,
     return 1;
 }
 
-const char* json_validate(parsed_json_t* parsed_transaction,
-                          const char *transaction) {
+const char* json_validate(parsed_json_t* parsed_json,
+                          const char* raw_json) {
 
-    if (contains_whitespace(parsed_transaction, transaction) == 1) {
+    if (contains_whitespace(parsed_json, raw_json) == 1) {
         return "Contains whitespace in the corpus";
     }
 
-    if (dictionaries_sorted(parsed_transaction, transaction) != 1) {
+    if (dictionaries_sorted(parsed_json, raw_json) != 1) {
         return "Dictionaries are not sorted";
     }
 
-    if (object_get_value(0,
-                         "block",
-                         parsed_transaction,
-                         transaction) == -1) {
-        return "Missing block";
+    int round_token_index = object_get_value(0,
+                         "round",
+                         parsed_json,
+                         raw_json);
+    if (round_token_index == -1) {
+        return "Missing round";
     }
 
-    if (object_get_value(0,
+    int height_token_index = object_get_value(0,
                          "height",
-                         parsed_transaction,
-                         transaction) == -1) {
+                         parsed_json,
+                         raw_json);
+    if (height_token_index == -1) {
         return "Missing height";
     }
 
     if (object_get_value(0,
                          "other",
-                         parsed_transaction,
-                         transaction) == -1) {
+                         parsed_json,
+                         raw_json) == -1) {
         return "Missing other";
     }
 
+    char* next_pos;
+    validation_parser_get_height(parsed_json, &next_pos, raw_json);
+    if (next_pos != (raw_json + parsed_json->Tokens[height_token_index].end)) {
+        return "Could not parse height";
+    }
+
+    validation_parser_get_round(parsed_json, &next_pos, raw_json);
+    if (next_pos != (raw_json + parsed_json->Tokens[round_token_index].end)) {
+        return "Could not parse round";
+    }
+
     return NULL;
+}
+
+int64_t validation_parser_get_height(
+        parsed_json_t* parsed_json,
+        char** next_char,
+        const char* raw_json)
+{
+    int token_index = object_get_value(0, "height", parsed_json, raw_json);
+    return strtoll(raw_json + parsed_json->Tokens[token_index].start, next_char, 10);
+}
+
+int8_t validation_parser_get_round(
+        parsed_json_t* parsed_json,
+        char** next_char,
+        const char* raw_json)
+{
+    int token_index = object_get_value(0, "round", parsed_json, raw_json);
+    return strtol(raw_json + parsed_json->Tokens[token_index].start, next_char, 10);
 }

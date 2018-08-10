@@ -38,7 +38,7 @@ file(GLOB_RECURSE APP_SRC
 
 file(GLOB_RECURSE LIB_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/src/lib/json_parser.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/lib/transaction_parser.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/lib/validation_parser.c
         ${CMAKE_CURRENT_SOURCE_DIR}/src/lib/buffering.c
         )
 
@@ -61,7 +61,7 @@ add_executable(
         tests_example
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/json_parser_tests.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/buffering_tests.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/tests/transaction_parser_tests.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/validation_parser_tests.cpp
 )
 
 target_link_libraries(tests_example gtest_main jsmn json_parser)
