@@ -18,21 +18,37 @@
 #define CI_TEST_VALIDATIONPARSER_H
 
 #include "json_parser.h"
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int validation_parser_get_height();
-int validation_parser_get_round();
+/// Extract height number from the json
+/// \param parsed_json, parsed json with validation message
+/// \param raw_json, raw json with validation message
+/// \return height number
+int64_t  validation_parser_get_height(
+        parsed_json_t* parsed_json,
+        char** next_char,
+        const char* raw_json);
+
+/// Extract round number from the json
+/// \param parsed_json, parsed json with validation message
+/// \param raw_json, raw json with validation message
+/// \return round number
+int8_t validation_parser_get_round(
+        parsed_json_t* parsed_json,
+        char** next_char,
+        const char* raw_json);
 
 /// Validate validation json
-/// \param parsed_validation_json
-/// \param validation_json
-/// \return
+/// \param parsed_json, parsed json with validation message
+/// \param raw_json, raw json with validation message
+/// \return error code
 const char* json_validate(
-        parsed_json_t* parsed_validation_json,
-        const char *validation_json);
+        parsed_json_t* parsed_json,
+        const char* raw_json);
 
 //---------------------------------------------
 // Delegates

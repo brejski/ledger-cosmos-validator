@@ -12,11 +12,14 @@ Messages passed to the Ledger device will be in the following format. The Ledger
 
 ```json
 {
-  "block": {number},
-  "height": {number},
-  "other": {string},
+  "height": number,
+  "other": string,
+  "round": number
 }
 ```
+
+round number has int8 type
+height number has int64 type
 
 ### Validation
 
