@@ -376,6 +376,8 @@ void accept_reference(int8_t round, int64_t height) {
     validation_reference_get()->CurrentHeight = height;
     validation_reference_get()->CurrentRound = round;
     validation_reference_get()->IsInitialized = 1;
+    view_set_pubic_key("TODO");
+    sign();
     view_display_validation_processing();
 }
 

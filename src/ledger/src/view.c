@@ -207,6 +207,13 @@ static unsigned int bagl_ui_validating_transaction_button(
         unsigned int button_mask,
         unsigned int button_mask_counter) {
 
+    switch (button_mask) {
+        // Press both left and right to switch to value scrolling
+        case BUTTON_EVT_RELEASED | BUTTON_LEFT | BUTTON_RIGHT: {
+            view_display_main_menu();
+            break;
+        }
+    }
     return 0;
 }
 
@@ -406,6 +413,5 @@ void view_set_round(int8_t round)
 
 void view_set_pubic_key(const char* publicKey)
 {
-    // TODO: Bounds checking
-    strcpy((char*)view_data_publicKey, publicKey);
+    snprintf((char*)view_data_publicKey, MAX_CHARS_PER_VALUE_LINE, "PK: %s", publicKey);
 }
