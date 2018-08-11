@@ -18,8 +18,8 @@ Messages passed to the Ledger device will be in the following format. The Ledger
 }
 ```
 
-round number has int8 type
-height number has int64 type
+- round number has int8 type
+- height number has int64 type
 
 ### Validation
 

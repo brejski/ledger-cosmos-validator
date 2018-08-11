@@ -75,7 +75,6 @@ const ux_menu_entry_t menu_main[] = {
 #else
     {NULL, NULL, 0, NULL, "Cosmos", "Validator", 0, 0},
 #endif
-    {NULL, NULL, 0, &C_icon_app, "Validator", NULL, 33, 12},
     {menu_about, NULL, 0, NULL, "About", NULL, 0, 0},
     {NULL, os_sched_exit, 0, &C_icon_dashboard, "Quit app", NULL, 50, 29},
     UX_MENU_END

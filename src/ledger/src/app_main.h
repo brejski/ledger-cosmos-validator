@@ -31,7 +31,6 @@
 #define INS_GET_VERSION                 0
 #define INS_PUBLIC_KEY_ED25519          1
 #define INS_SIGN_ED25519                2
-#define INIT_VALIDATOR                  3
 
 void app_init();
 
