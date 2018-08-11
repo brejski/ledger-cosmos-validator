@@ -234,24 +234,25 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
             }
                 break;
 
-            case INIT_VALIDATOR:
-                if (!process_chunk(tx, rx, true)) {
-                    THROW(APDU_CODE_OK);
-                }
-                const char *error_msg = validation_parse();
-                if (error_msg != NULL) {
-                    int error_msg_length = strlen(error_msg);
-                    os_memmove(G_io_apdu_buffer, error_msg, error_msg_length);
-                    *tx += sizeof(error_msg_length);
-                    // FIXME: We need proper error code for this.
-                    THROW(APDU_CODE_DATA_INVALID);
-                }
-
-                // Add parsing for the message
-                // Extract height and something else
-                // TODO: Get values and ask for verification
-                THROW(APDU_CODE_OK);
-                break;
+//            case INIT_VALIDATOR:
+// FIXME: This command is obsolete. Initialization will happen with the first signature request
+//                if (!process_chunk(tx, rx, true)) {
+//                    THROW(APDU_CODE_OK);
+//                }
+//                const char *error_msg = validation_parse();
+//                if (error_msg != NULL) {
+//                    int error_msg_length = strlen(error_msg);
+//                    os_memmove(G_io_apdu_buffer, error_msg, error_msg_length);
+//                    *tx += sizeof(error_msg_length);
+//                    // FIXME: We need proper error code for this.
+//                    THROW(APDU_CODE_DATA_INVALID);
+//                }
+//
+//                // Add parsing for the message
+//                // Extract height and something else
+//                // TODO: Get values and ask for verification
+//                THROW(APDU_CODE_OK);
+//                break;
 
             default:THROW(APDU_CODE_INS_NOT_SUPPORTED);
             }

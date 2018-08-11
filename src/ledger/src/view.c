@@ -90,16 +90,16 @@ static const bagl_element_t bagl_ui_initialize_transaction[] = {
     UI_FillRectangle(0, 0, 0, 128, 32, 0x000000, 0xFFFFFF),
     UI_Icon(0, 0, 0, 7, 7, BAGL_GLYPH_ICON_CROSS),
     UI_Icon(0, 128 - 7, 0, 7, 7, BAGL_GLYPH_ICON_CHECK),
-    UI_LabelLineNoScrolling(1, 0, 8, 128, 11, 0xFFFFFF, 0x000000, "Init validation"),
-    UI_LabelLineNoScrolling(1, 0, 19, 128, 11, 0xFFFFFF, 0x000000, "Height: "),
-    UI_LabelLineNoScrolling(1, 0, 30, 128, 11, 0xFFFFFF, 0x000000, "Round: "),
+    UI_LabelLine(1, 0, 8, 128, 11, 0xFFFFFF, 0x000000, "Init validation"),
+    UI_LabelLine(1, 0, 19, 128, 11, 0xFFFFFF, 0x000000, "Height: "),
+    UI_LabelLine(1, 0, 30, 128, 11, 0xFFFFFF, 0x000000, "Round: "),
 };
 
 static const bagl_element_t bagl_ui_validating_transaction[] = {
         UI_FillRectangle(0, 0, 0, 128, 32, 0x000000, 0xFFFFFF),
-        UI_LabelLineNoScrolling(1, 0, 8, 128, 11, 0xFFFFFF, 0x000000, "Validating"),
-        UI_LabelLine(1, 0, 19, 128, 11, 0xFFFFFF, 0x000000, "Public Key: "),
-        UI_LabelLineNoScrolling(1, 0, 30, 128, 11, 0xFFFFFF, 0x000000, "Height: "),
+        UI_LabelLine(1, 0, 8, 128, 11, 0xFFFFFF, 0x000000, "Validating"),
+        UI_LabelLineScrolling(1, 0, 19, 128, 11, 0xFFFFFF, 0x000000, "Public Key: "),
+        UI_LabelLine(1, 0, 30, 128, 11, 0xFFFFFF, 0x000000, "Height: "),
 };
 
 
@@ -107,18 +107,18 @@ static const bagl_element_t bagl_ui_validating_transaction[] = {
 //    UI_FillRectangle(0, 0, 0, 128, 32, 0x000000, 0xFFFFFF),
 //    UI_Icon(0, 0, 0, 7, 7, BAGL_GLYPH_ICON_LEFT),
 //    UI_Icon(0, 128 - 7, 0, 7, 7, BAGL_GLYPH_ICON_RIGHT),
-//    UI_LabelLineNoScrolling(1, 0, 8, 128, 11, 0xFFFFFF, 0x000000, (const char *) pageInfo),
-//    UI_LabelLineNoScrolling(1, 0, 19, 128, 11, 0xFFFFFF, 0x000000, (const char *) transactionDataKey),
-//    UI_LabelLine(2, 0, 30, 128, 11, 0xFFFFFF, 0x000000, (const char *) transactionDataValue),
+//    UI_LabelLine(1, 0, 8, 128, 11, 0xFFFFFF, 0x000000, (const char *) pageInfo),
+//    UI_LabelLine(1, 0, 19, 128, 11, 0xFFFFFF, 0x000000, (const char *) transactionDataKey),
+//    UI_LabelLineScrolling(2, 0, 30, 128, 11, 0xFFFFFF, 0x000000, (const char *) transactionDataValue),
 //};
 
 //static const bagl_element_t bagl_ui_transaction_info_keyscrolling[] = {
 //    UI_FillRectangle(0, 0, 0, 128, 32, 0x000000, 0xFFFFFF),
 //    UI_Icon(0, 0, 0, 7, 7, BAGL_GLYPH_ICON_LEFT),
 //    UI_Icon(0, 128 - 7, 0, 7, 7, BAGL_GLYPH_ICON_RIGHT),
-//    UI_LabelLineNoScrolling(1, 0, 8, 128, 11, 0xFFFFFF, 0x000000, (const char *) pageInfo),
-//    UI_LabelLineNoScrolling(1, 0, 30, 128, 11, 0xFFFFFF, 0x000000, (const char *) transactionDataValue),
-//    UI_LabelLine(2, 0, 19, 128, 11, 0xFFFFFF, 0x000000, (const char *) transactionDataKey),
+//    UI_LabelLine(1, 0, 8, 128, 11, 0xFFFFFF, 0x000000, (const char *) pageInfo),
+//    UI_LabelLine(1, 0, 30, 128, 11, 0xFFFFFF, 0x000000, (const char *) transactionDataValue),
+//    UI_LabelLineScrolling(2, 0, 19, 128, 11, 0xFFFFFF, 0x000000, (const char *) transactionDataKey),
 //};
 //------ View elements
 
