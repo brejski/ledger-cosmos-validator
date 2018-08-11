@@ -34,7 +34,6 @@ import (
 	"github.com/zondax/ledger-goclient"
 	"os"
 	"strconv"
-	"math"
 )
 
 func PrintSampleFunc(message bank.MsgSend, output string) {
@@ -293,11 +292,24 @@ func testAutomaticValidation(ledger *ledger_goclient.Ledger) {
 	fmt.Printf("\nSending initialization message:\n")
 
 	path := []uint32{44, 60, 0, 0, 0}
-	message := []byte("{\"height\": 0,\"other\":\"Some dummy data\",\"round\":0}")
+	message := []byte("{\"height\":0,\"other\":\"Some dummy data\",\"round\":0}")
 	_, err := ledger.SignED25519(path, message)
 	if err != nil {
 		fmt.Printf("[Sign] Error: %s\n", err)
-		os.Exit(1)
+	}
+
+	fmt.Printf("\nSending next message:\n")
+	message = []byte("{\"height\":1,\"other\":\"Some dummy data\",\"round\":0}")
+	_, err = ledger.SignED25519(path, message)
+	if err != nil {
+		fmt.Printf("[Sign] Error: %s\n", err)
+	}
+
+	fmt.Printf("\nSending next message:\n")
+	message = []byte("{\"height\":2,\"other\":\"Some dummy data\",\"round\":0}")
+	_, err = ledger.SignED25519(path, message)
+	if err != nil {
+		fmt.Printf("[Sign] Error: %s\n", err)
 	}
 }
 
