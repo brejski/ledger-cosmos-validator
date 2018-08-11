@@ -71,9 +71,9 @@ const ux_menu_entry_t menu_about[];
 
 const ux_menu_entry_t menu_main[] = {
 #ifdef TESTING_ENABLED
-    {NULL, NULL, 0, NULL, "Tendermint", "Cosmos TEST!", 0, 0},
+    {NULL, NULL, 0, NULL, "Cosmos TEST!", "Validator", 0, 0},
 #else
-    {NULL, NULL, 0, NULL, "Tendermint", "Cosmos", 0, 0},
+    {NULL, NULL, 0, NULL, "Cosmos", "Validator", 0, 0},
 #endif
     {NULL, NULL, 0, &C_icon_app, "Validator", NULL, 33, 12},
     {menu_about, NULL, 0, NULL, "About", NULL, 0, 0},
