@@ -402,7 +402,7 @@ void view_display_validation_processing() {
 void view_set_height(int64_t height)
 {
     data_height = height;
-    snprintf((char*)view_data_height, MAX_CHARS_PER_VALUE_LINE, "Height: %lld", height);
+    snprintf((char*)view_data_height, MAX_CHARS_PER_VALUE_LINE, "Height: %d", (int)height);
 }
 
 void view_set_round(int8_t round)

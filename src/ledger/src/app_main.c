@@ -24,6 +24,7 @@
 #include <os.h>
 
 #include <string.h>
+#include "validation_parser.h"
 
 #ifdef TESTING_ENABLED
 // Generate using always the same private data
@@ -244,6 +245,8 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
                         view_set_height(height);
                         view_display_validation_processing();
                         sign();
+                        validation_reference_get()->CurrentRound = round;
+                        validation_reference_get()->CurrentHeight = height;
                     } else {
                         THROW(APDU_CODE_DATA_INVALID);
                     }
@@ -254,51 +257,8 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
                     view_display_validation_init();
                     *flags |= IO_ASYNCH_REPLY;
                 }
-                // Add parsing for the message
-                // Extract height and something else
-                // TODO: Get values and ask for verification
-                //THROW(APDU_CODE_OK);
-
-//                current_sigtype = ED25519;
-//                if (!process_chunk(tx, rx, true))
-//                    THROW(APDU_CODE_OK);
-//
-//                const char *error_msg = transaction_parse();
-//                if (error_msg != NULL) {
-//                    int error_msg_length = strlen(error_msg);
-//                    os_memmove(G_io_apdu_buffer, error_msg, error_msg_length);
-//                    *tx += sizeof(error_msg_length);
-//                    // FIXME: We need proper error code for this.
-//                    THROW(APDU_CODE_DATA_INVALID);
-//                }
-//
-//                // TODO: Sign without any verification
-//                view_add_update_transaction_info_event_handler(&transaction_get_display_key_value);
-//                view_display_transaction_menu(transaction_get_display_pages());
-//
-//                *flags |= IO_ASYNCH_REPLY;
             }
                 break;
-
-//            case INIT_VALIDATOR:
-// FIXME: This command is obsolete. Initialization will happen with the first signature request
-//                if (!process_chunk(tx, rx, true)) {
-//                    THROW(APDU_CODE_OK);
-//                }
-//                const char *error_msg = validation_parse();
-//                if (error_msg != NULL) {
-//                    int error_msg_length = strlen(error_msg);
-//                    os_memmove(G_io_apdu_buffer, error_msg, error_msg_length);
-//                    *tx += sizeof(error_msg_length);
-//                    // FIXME: We need proper error code for this.
-//                    THROW(APDU_CODE_DATA_INVALID);
-//                }
-//
-//                // Add parsing for the message
-//                // Extract height and something else
-//                // TODO: Get values and ask for verification
-//                THROW(APDU_CODE_OK);
-//                break;
 
             default:THROW(APDU_CODE_INS_NOT_SUPPORTED);
             }
