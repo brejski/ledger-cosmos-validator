@@ -31,6 +31,8 @@ LINE2:                      Cosmos TEST!
 LINE3: [tendermint icon]    Validator       [down icon]
 ```
 
+*"TEST!" is only shown when the application has been compiled in TEST mode.*
+
 Screen 2.
 ```
 LINE1:
@@ -52,7 +54,7 @@ Moves to the next screen.
 ##### Left and Right clicked together on the Screen #3
 Exits the app.
 
-### B. 'Init Validation' page
+### B. 'Initialization' page
 
 #### Layout:
 Screen 1. (default)
@@ -61,6 +63,10 @@ LINE1:  [X]       Init Validation       [OK]
 LINE2:            Height: {height}
 LINE3:            Round:  {round}
 ```
+ - Show in the screen the values and ask for confirmation.
+ - While in this mode, any signature requests should be immediately rejected.
+ - If the user confirms the values, the ledger will initialize the values and move back to signing mode
+ - If the user reject, the ledger will keep values as not-initialized and move back to signing mode 
  
 ### C. 'Validation' page
 
@@ -70,7 +76,6 @@ Screen 1. (default)
 LINE1:            Validating  
 LINE2:            Public Key (scrolling)
 LINE3:            Height: {height}
-
+```
 - Buttons are disabled.
 - Screen will go back to main menu after 1 minute. This counter will reset every time there is a signature.
-```

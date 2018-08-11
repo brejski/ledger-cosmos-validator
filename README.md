@@ -26,6 +26,6 @@ Continuous integration generates a demo.zip. This includes firmware plus a shell
 
 **Specifications**
 
-- [APDU Protocol](./docs/PROTOSPEC.md)
+- [APDU Protocol](./docs/APDUSPEC.md)
 - [Transaction format](./docs/TXSPEC.md)
 - [User interface](./docs/UISPEC.md)

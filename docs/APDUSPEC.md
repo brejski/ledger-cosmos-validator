@@ -92,8 +92,9 @@ The HSM keeps in RAM:
 - Latest height
 - Latest round
 
-Signing does not work unless these two values have been initialized via API + confirmation by the user. See **INIT_VALIDATOR**
+**First signature / initialization**
 
+When starting the app, height and round will not be initialized. The first signature request will be used for initialization. The signature request should be rejected immediately and the the UI should switch to initialization mode. Refer the the UI spec.
 
 #### Command
 
@@ -110,30 +111,4 @@ Signing does not work unless these two values have been initialized via API + co
 | Field   | Type      | Content       | Note                            |
 | ------- | --------- | ------------- | ------------------------------- |
 | SIG     | byte (64) | Signature     |  |
-| SW1-SW2 | byte (2)  | Return code   | see list of return codes        |
-
-### INIT_VALIDATOR
-
-This command allows the KMS to initialize:
-- latest height (uint64)
-- latest round  (uint64)
-
-This command requires manual confirmation (double click).
-
-#### Command
-
-| Field | Type     | Content                | Expected |
-| ----- | -------- | ---------------------- | -------- |
-| CLA   | byte (1) | Application Identifier | 0x55     |
-| INS   | byte (1) | Instruction ID         | 0x03     |
-| P1    | byte (1) | Packet Current Index   | ignored  |
-| P2    | byte (1) | Packet Total Count     | ignored  |
-| L     | byte (1) | Bytes in payload       | 16       |
-| H     | uint64 (1) | Current Height       | ??       |
-| R     | uint64 (1) | Current Round        | ??       |
-
-#### Response
-
-| Field   | Type      | Content       | Note                            |
-| ------- | --------- | ------------- | ------------------------------- |
 | SW1-SW2 | byte (2)  | Return code   | see list of return codes        |

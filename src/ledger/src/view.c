@@ -71,11 +71,10 @@ const ux_menu_entry_t menu_about[];
 
 const ux_menu_entry_t menu_main[] = {
 #ifdef TESTING_ENABLED
-    {NULL, NULL, 0, NULL, "Tendermint", "Cosmos TEST!", 0, 0},
+    {NULL, NULL, 0, NULL, "Cosmos TEST!", "Validator", 0, 0},
 #else
-    {NULL, NULL, 0, NULL, "Tendermint", "Cosmos", 0, 0},
+    {NULL, NULL, 0, NULL, "Cosmos", "Validator", 0, 0},
 #endif
-    {NULL, NULL, 0, &C_icon_app, "Validator", NULL, 33, 12},
     {menu_about, NULL, 0, NULL, "About", NULL, 0, 0},
     {NULL, os_sched_exit, 0, &C_icon_dashboard, "Quit app", NULL, 50, 29},
     UX_MENU_END
@@ -91,16 +90,16 @@ static const bagl_element_t bagl_ui_initialize_transaction[] = {
     UI_FillRectangle(0, 0, 0, 128, 32, 0x000000, 0xFFFFFF),
     UI_Icon(0, 0, 0, 7, 7, BAGL_GLYPH_ICON_CROSS),
     UI_Icon(0, 128 - 7, 0, 7, 7, BAGL_GLYPH_ICON_CHECK),
-    UI_LabelLineNoScrolling(1, 0, 8, 128, 11, 0xFFFFFF, 0x000000, "Init validation"),
-    UI_LabelLineNoScrolling(1, 0, 19, 128, 11, 0xFFFFFF, 0x000000, "Height: "),
-    UI_LabelLineNoScrolling(1, 0, 30, 128, 11, 0xFFFFFF, 0x000000, "Round: "),
+    UI_LabelLine(1, 0, 8, 128, 11, 0xFFFFFF, 0x000000, "Init validation"),
+    UI_LabelLine(1, 0, 19, 128, 11, 0xFFFFFF, 0x000000, "Height: "),
+    UI_LabelLine(1, 0, 30, 128, 11, 0xFFFFFF, 0x000000, "Round: "),
 };
 
 static const bagl_element_t bagl_ui_validating_transaction[] = {
         UI_FillRectangle(0, 0, 0, 128, 32, 0x000000, 0xFFFFFF),
-        UI_LabelLineNoScrolling(1, 0, 8, 128, 11, 0xFFFFFF, 0x000000, "Validating"),
-        UI_LabelLine(1, 0, 19, 128, 11, 0xFFFFFF, 0x000000, "Public Key: "),
-        UI_LabelLineNoScrolling(1, 0, 30, 128, 11, 0xFFFFFF, 0x000000, "Height: "),
+        UI_LabelLine(1, 0, 8, 128, 11, 0xFFFFFF, 0x000000, "Validating"),
+        UI_LabelLineScrolling(1, 0, 19, 128, 11, 0xFFFFFF, 0x000000, "Public Key: "),
+        UI_LabelLine(1, 0, 30, 128, 11, 0xFFFFFF, 0x000000, "Height: "),
 };
 
 
@@ -108,18 +107,18 @@ static const bagl_element_t bagl_ui_validating_transaction[] = {
 //    UI_FillRectangle(0, 0, 0, 128, 32, 0x000000, 0xFFFFFF),
 //    UI_Icon(0, 0, 0, 7, 7, BAGL_GLYPH_ICON_LEFT),
 //    UI_Icon(0, 128 - 7, 0, 7, 7, BAGL_GLYPH_ICON_RIGHT),
-//    UI_LabelLineNoScrolling(1, 0, 8, 128, 11, 0xFFFFFF, 0x000000, (const char *) pageInfo),
-//    UI_LabelLineNoScrolling(1, 0, 19, 128, 11, 0xFFFFFF, 0x000000, (const char *) transactionDataKey),
-//    UI_LabelLine(2, 0, 30, 128, 11, 0xFFFFFF, 0x000000, (const char *) transactionDataValue),
+//    UI_LabelLine(1, 0, 8, 128, 11, 0xFFFFFF, 0x000000, (const char *) pageInfo),
+//    UI_LabelLine(1, 0, 19, 128, 11, 0xFFFFFF, 0x000000, (const char *) transactionDataKey),
+//    UI_LabelLineScrolling(2, 0, 30, 128, 11, 0xFFFFFF, 0x000000, (const char *) transactionDataValue),
 //};
 
 //static const bagl_element_t bagl_ui_transaction_info_keyscrolling[] = {
 //    UI_FillRectangle(0, 0, 0, 128, 32, 0x000000, 0xFFFFFF),
 //    UI_Icon(0, 0, 0, 7, 7, BAGL_GLYPH_ICON_LEFT),
 //    UI_Icon(0, 128 - 7, 0, 7, 7, BAGL_GLYPH_ICON_RIGHT),
-//    UI_LabelLineNoScrolling(1, 0, 8, 128, 11, 0xFFFFFF, 0x000000, (const char *) pageInfo),
-//    UI_LabelLineNoScrolling(1, 0, 30, 128, 11, 0xFFFFFF, 0x000000, (const char *) transactionDataValue),
-//    UI_LabelLine(2, 0, 19, 128, 11, 0xFFFFFF, 0x000000, (const char *) transactionDataKey),
+//    UI_LabelLine(1, 0, 8, 128, 11, 0xFFFFFF, 0x000000, (const char *) pageInfo),
+//    UI_LabelLine(1, 0, 30, 128, 11, 0xFFFFFF, 0x000000, (const char *) transactionDataValue),
+//    UI_LabelLineScrolling(2, 0, 19, 128, 11, 0xFFFFFF, 0x000000, (const char *) transactionDataKey),
 //};
 //------ View elements
 
