@@ -15,9 +15,15 @@
 ********************************************************************************/
 #pragma once
 
-#include "transaction_parser.h"
+#include "validation_parser.h"
 #include "os.h"
 
+// TODO: Rename to disambiguate
+void validation_reference_reset();
+// TODO: Rename to disambiguate
+validation_reference_t* validation_reference_get();
+
+// Initializes validation context
 void validation_initialize();
 
 /// Clears the transaction buffer
@@ -28,7 +34,7 @@ void validation_reset();
 /// \param buffer
 /// \param length
 void validation_append(unsigned char *buffer,
-                        uint32_t length);
+                       uint32_t length);
 
 /// Returns size of the raw json transaction buffer
 /// \return
@@ -36,7 +42,7 @@ uint32_t validation_get_buffer_length();
 
 /// Returns the raw json transaction buffer
 /// \return
-uint8_t* validation_get_buffer();
+const uint8_t* validation_get_buffer();
 
 /// Parse json message stored in transaction buffer
 /// This function should be called as soon as full buffer data is loaded.

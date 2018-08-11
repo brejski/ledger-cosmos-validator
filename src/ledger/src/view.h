@@ -24,43 +24,31 @@
 #define MAX_SCREEN_LINE_WIDTH       22
 
 enum UI_STATE {
-    UI_IDLE,
-    UI_TRANSACTION
+    UI_MAIN_MENU,
+    UI_VALIDAITON_INIT,
+    UI_VALIDATION_PROCESSING
 };
 
 extern enum UI_STATE view_uiState;
 
 //------ Delegates definitions
-typedef int (*delegate_update_transaction_info)(char*,int, char*, int, int, int*);
-typedef void (*delegate_reject_transaction)();
-
-typedef void (*delegate_sign_transaction)();
+typedef void (*delegate_accept_reference_signature)(int8_t round, int64_t height);
+typedef void (*delegate_reject_reference_signature)();
 
 //------ Event handlers
-/// view_add_update_transaction_info_event_handler
-/// \param delegate
-void view_add_update_transaction_info_event_handler(delegate_update_transaction_info delegate);
+/// Set accept reference signature event handler
+void view_set_accept_eh(delegate_accept_reference_signature delegate);
 
-/// view_add_reject_transaction_event_handler
-/// \param delegate
-void view_add_reject_transaction_event_handler(delegate_reject_transaction delegate);
-
-/// view_add_sign_transaction_event_handler
-/// \param delegate
-void view_add_sign_transaction_event_handler(delegate_sign_transaction delegate);
+/// Set reject reference signature event handler
+void view_set_reject_eh(delegate_reject_reference_signature delegate);
 
 //------ Common functions
-/// view_init
-void view_init(void);
+void view_init();
+void view_display_main_menu();
 
-/// view_idle
-void view_idle(unsigned int ignored);
+void view_set_height(int64_t height);
+void view_set_round(int8_t round);
+void view_set_pubic_key(const char* publicKey);
 
-/// view_display_transaction_menu
-void view_display_transaction_menu(unsigned int ignored);
-
-/// view_display_signing_success
-void view_display_signing_success();
-
-/// view_display_signing_error
-void view_display_signing_error();
+void view_display_validation_init();
+void view_display_validation_processing();

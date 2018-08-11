@@ -105,7 +105,7 @@ void app_init() {
     io_seproxyhal_init();
     USB_power(0);
     USB_power(1);
-    view_idle(0);
+    view_display_main_menu();
 }
 
 bool extractBip32(uint8_t *depth, uint32_t path[10], uint32_t rx, uint32_t offset) {
@@ -213,6 +213,52 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
             }
 
             case INS_SIGN_ED25519: {
+                if (!process_chunk(tx, rx, true)) {
+                    THROW(APDU_CODE_OK);
+                }
+                const char *error_msg = validation_parse();
+                if (error_msg != NULL) {
+                    int error_msg_length = strlen(error_msg);
+                    os_memmove(G_io_apdu_buffer, error_msg, error_msg_length);
+                    *tx += sizeof(error_msg_length);
+                    THROW(APDU_CODE_DATA_INVALID);
+                }
+
+                int8_t round = validation_parser_get_round(
+                        validation_get_parsed(),
+                        NULL,
+                        (const char*)validation_get_buffer());
+
+                int64_t height = validation_parser_get_height(
+                        validation_get_parsed(),
+                        NULL,
+                        (const char*)validation_get_buffer());
+
+                if (validation_reference_get()->IsInitialized == 1) {
+
+                    if ((round > validation_reference_get()->CurrentRound)
+                        ||
+                        ((round == validation_reference_get()->CurrentRound)
+                         && height > validation_reference_get()->CurrentHeight)) {
+                        view_set_round(round);
+                        view_set_height(height);
+                        view_display_validation_processing();
+                        sign();
+                    } else {
+                        THROW(APDU_CODE_DATA_INVALID);
+                    }
+                }
+                else {
+                    view_set_round(round);
+                    view_set_height(height);
+                    view_display_validation_init();
+                    *flags |= IO_ASYNCH_REPLY;
+                }
+                // Add parsing for the message
+                // Extract height and something else
+                // TODO: Get values and ask for verification
+                //THROW(APDU_CODE_OK);
+
 //                current_sigtype = ED25519;
 //                if (!process_chunk(tx, rx, true))
 //                    THROW(APDU_CODE_OK);
@@ -281,55 +327,66 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
     END_TRY;
 }
 
-//void reject_transaction() {
-//    set_code(G_io_apdu_buffer, 0, APDU_CODE_COMMAND_NOT_ALLOWED);
-//    io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, 2);
-//    view_idle(0);
-//}
-//
-//void sign_transaction() {
-//    // Generate keys
-//    cx_ecfp_public_key_t publicKey;
-//    cx_ecfp_private_key_t privateKey;
-//    uint8_t privateKeyData[32];
-//
-//    unsigned int length = 0;
-//    int result = 0;
-//    switch (current_sigtype) {
-//    case ED25519:
-//        os_perso_derive_node_bip32(
-//            CX_CURVE_Ed25519,
-//            bip32_path, bip32_depth,
-//            privateKeyData, NULL);
-//
-//        keys_ed25519(&publicKey, &privateKey, privateKeyData);
-//        memset(privateKeyData, 0, 32);
-//
-//        result = sign_ed25519(
-//            transaction_get_buffer(),
-//            transaction_get_buffer_length(),
-//            G_io_apdu_buffer,
-//            IO_APDU_BUFFER_SIZE,
-//            &length,
-//            &privateKey);
-//        break;
-//    }
-//    if (result == 1) {
-//        set_code(G_io_apdu_buffer, length, APDU_CODE_OK);
-//        io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, length + 2);
-//        view_display_signing_success();
-//    } else {
-//        set_code(G_io_apdu_buffer, length, APDU_CODE_SIGN_VERIFY_ERROR);
-//        io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, length + 2);
-//        view_display_signing_error();
-//    }
-//}
+void reject_reference() {
+    set_code(G_io_apdu_buffer, 0, APDU_CODE_COMMAND_NOT_ALLOWED);
+    io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, 2);
+    view_display_main_menu();
+}
+
+void sign()
+{
+    // Generate keys
+    cx_ecfp_public_key_t publicKey;
+    cx_ecfp_private_key_t privateKey;
+    uint8_t privateKeyData[32];
+
+    unsigned int length = 0;
+    int result = 0;
+    switch (current_sigtype) {
+        case ED25519:
+            os_perso_derive_node_bip32(
+                    CX_CURVE_Ed25519,
+                    bip32_path, bip32_depth,
+                    privateKeyData, NULL);
+
+            keys_ed25519(&publicKey, &privateKey, privateKeyData);
+            memset(privateKeyData, 0, 32);
+
+            result = sign_ed25519(
+                    validation_get_buffer(),
+                    validation_get_buffer_length(),
+                    G_io_apdu_buffer,
+                    IO_APDU_BUFFER_SIZE,
+                    &length,
+                    &privateKey);
+            break;
+    }
+    if (result == 1) {
+        set_code(G_io_apdu_buffer, length, APDU_CODE_OK);
+        io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, length + 2);
+        //view_display_signing_success();
+    } else {
+        set_code(G_io_apdu_buffer, length, APDU_CODE_SIGN_VERIFY_ERROR);
+        io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, length + 2);
+        //view_display_signing_error();
+    }
+}
+
+void accept_reference(int8_t round, int64_t height) {
+    validation_reference_get()->CurrentHeight = height;
+    validation_reference_get()->CurrentRound = round;
+    validation_reference_get()->IsInitialized = 1;
+    view_display_validation_processing();
+}
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
 void app_main() {
     volatile uint32_t rx = 0, tx = 0, flags = 0;
 
+    validation_reference_reset();
+    view_set_accept_eh(&accept_reference);
+    view_set_reject_eh(&reject_reference);
     //view_add_reject_transaction_event_handler(&reject_transaction);
     //view_add_sign_transaction_event_handler(&sign_transactio§§  n);
 

@@ -16,7 +16,7 @@
 
 #include <jsmn.h>
 #include <stdio.h>
-#include <stdlib.h>
+//#include <stdlib.h>
 #include "validation_parser.h"
 #include "json_parser.h"
 
@@ -190,7 +190,8 @@ int64_t validation_parser_get_height(
         const char* raw_json)
 {
     int token_index = object_get_value(0, "height", parsed_json, raw_json);
-    return strtoll(raw_json + parsed_json->Tokens[token_index].start, next_char, 10);
+    //return strtoll(raw_json + parsed_json->Tokens[token_index].start, next_char, 10);
+    return 0;
 }
 
 int8_t validation_parser_get_round(
@@ -199,5 +200,6 @@ int8_t validation_parser_get_round(
         const char* raw_json)
 {
     int token_index = object_get_value(0, "round", parsed_json, raw_json);
-    return strtol(raw_json + parsed_json->Tokens[token_index].start, next_char, 10);
+    //return strtol(raw_json + parsed_json->Tokens[token_index].start, next_char, 10);
+    return 0;
 }
