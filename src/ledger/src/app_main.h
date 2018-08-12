@@ -34,5 +34,5 @@
 
 void app_init();
 void app_main();
-void sign();
+void sign(volatile uint32_t *tx);
 

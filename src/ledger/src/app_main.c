@@ -254,9 +254,11 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
                         view_set_round(round);
                         view_set_height(height);
 
+                        // TODO: UI refresh is broken
+                        // Uncommenting function below crashes Ledger
                         //view_display_validation_processing();
 
-                        //sign();
+                        sign(tx);
 
                         validation_reference_get()->CurrentRound = round;
                         validation_reference_get()->CurrentHeight = height;
@@ -311,14 +313,12 @@ void accept_reference(int8_t round, int64_t height) {
     validation_reference_get()->CurrentRound = round;
     validation_reference_get()->IsInitialized = 1;
     view_set_pubic_key("TODO");
-    //sign();
-
     set_code(G_io_apdu_buffer, 0, APDU_CODE_OK);
     io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, 2);
     view_display_validation_processing();
 }
 
-void sign()
+void sign(volatile uint32_t *tx)
 {
     // Generate keys
     cx_ecfp_public_key_t publicKey;
@@ -346,12 +346,11 @@ void sign()
                     &privateKey);
             break;
     }
+    *tx += length;
     if (result == 1) {
-        set_code(G_io_apdu_buffer, length, APDU_CODE_OK);
-        io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, length + 2);
+        THROW(APDU_CODE_OK);
     } else {
-        set_code(G_io_apdu_buffer, length, APDU_CODE_SIGN_VERIFY_ERROR);
-        io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, length + 2);
+        THROW(APDU_CODE_SIGN_VERIFY_ERROR);
     }
 }
 
