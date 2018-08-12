@@ -34,8 +34,12 @@ extern enum UI_STATE view_uiState;
 //------ Delegates definitions
 typedef void (*delegate_accept_reference_signature)(int8_t round, int64_t height);
 typedef void (*delegate_reject_reference_signature)();
+typedef void (*delegate_validation_reset)();
 
 //------ Event handlers
+/// Set validation reset event handler
+void view_set_validation_reset_eh(delegate_validation_reset delegate);
+
 /// Set accept reference signature event handler
 void view_set_accept_eh(delegate_accept_reference_signature delegate);
 

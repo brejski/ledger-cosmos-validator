@@ -34,7 +34,7 @@ TEST(ValidationParserTest, ParseRoundMin) {
     const char* transaction = R"({"height":0,"other":{"Hello world"},"round":0})";
     parsed_json_t parsed_json;
     json_parse(&parsed_json, transaction);
-    int8_t round = validation_parser_get_round(&parsed_json, NULL, transaction);
+    int8_t round = validation_parser_get_round(&parsed_json, transaction, NULL);
     EXPECT_EQ(round, 0) << "Round not parsed correctly";
 }
 
@@ -43,7 +43,7 @@ TEST(ValidationParserTest, ParseHeightMin) {
     const char* transaction = R"({"height":0,"other":{"Hello world"},"round":100})";
     parsed_json_t parsed_json;
     json_parse(&parsed_json, transaction);
-    int64_t height = validation_parser_get_height(&parsed_json, NULL, transaction);
+    int64_t height = validation_parser_get_height(&parsed_json, transaction, NULL);
     EXPECT_EQ(height, 0) << "Height not parsed correctly";
 }
 
@@ -51,7 +51,7 @@ TEST(ValidationParserTest, ParseRoundDecimal) {
     const char* transaction = R"({"height":200,"other":{"Hello world"},"round":100})";
     parsed_json_t parsed_json;
     json_parse(&parsed_json, transaction);
-    int8_t round = validation_parser_get_round(&parsed_json, NULL, transaction);
+    int8_t round = validation_parser_get_round(&parsed_json, transaction, NULL);
     EXPECT_EQ(round, 100) << "Round not parsed correctly";
 }
 
@@ -59,7 +59,7 @@ TEST(ValidationParserTest, ParseHeightDecimal) {
     const char* transaction = R"({"height":200,"other":{"Hello world"},"round":100})";
     parsed_json_t parsed_json;
     json_parse(&parsed_json, transaction);
-    int64_t height = validation_parser_get_height(&parsed_json, NULL, transaction);
+    int64_t height = validation_parser_get_height(&parsed_json, transaction, NULL);
     EXPECT_EQ(height, 200) << "Height not parsed correctly";
 }
 
@@ -68,7 +68,7 @@ TEST(ValidationParserTest, ParseRoundMax) {
     const char *transaction = R"({"round":127,"height":200,"other":{"Hello world"}})";
     parsed_json_t parsed_json;
     json_parse(&parsed_json, transaction);
-    int8_t round = validation_parser_get_round(&parsed_json, NULL, transaction);
+    int8_t round = validation_parser_get_round(&parsed_json, transaction, NULL);
     EXPECT_EQ(round, std::numeric_limits<int8_t>::max()) << "Round not parsed correctly";
 }
 
@@ -77,7 +77,7 @@ TEST(ValidationParserTest, ParseHeightMax) {
     const char* transaction = R"({"round":100,"height":9223372036854775807,"other":{"Hello world"}})";
     parsed_json_t parsed_json;
     json_parse(&parsed_json, transaction);
-    int64_t height = validation_parser_get_height(&parsed_json, NULL, transaction);
+    int64_t height = validation_parser_get_height(&parsed_json, transaction, NULL);
     EXPECT_EQ(height, std::numeric_limits<int64_t>::max()) << "Height not parsed correctly";
 }
 
@@ -86,7 +86,7 @@ TEST(ValidationParserTest, Parse_NegativeHeight) {
     const char* transaction = R"({"height":-200,"other":{"Hello world"},"round":100})";
     parsed_json_t parsed_json;
     json_parse(&parsed_json, transaction);
-    int64_t height = validation_parser_get_height(&parsed_json, NULL, transaction);
+    int64_t height = validation_parser_get_height(&parsed_json, transaction, NULL);
     EXPECT_EQ(-200, height) << "Height not parsed correctly";
 }
 
@@ -95,7 +95,7 @@ TEST(ValidationParserTest, Parse_NegativeRound) {
     const char* transaction = R"({"round":-100,"height":200,"other":{"Hello world"}})";
     parsed_json_t parsed_json;
     json_parse(&parsed_json, transaction);
-    int8_t round = validation_parser_get_round(&parsed_json, NULL, transaction);
+    int8_t round = validation_parser_get_round(&parsed_json, transaction, NULL);
     EXPECT_EQ(-100, round) << "Round not parsed correctly";
 }
 

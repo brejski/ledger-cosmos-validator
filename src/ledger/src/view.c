@@ -24,6 +24,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <inttypes.h>
 
 #define TRUE  1
 #define FALSE 0
@@ -39,15 +40,22 @@ ux_state_t ux;
 enum UI_STATE view_uiState;
 enum UI_DISPLAY_MODE scrolling_mode;
 
-volatile char view_data_height[MAX_CHARS_PER_VALUE_LINE];
-volatile char view_data_round[MAX_CHARS_PER_VALUE_LINE];
-volatile char view_data_publicKey[MAX_CHARS_PER_VALUE_LINE];
+volatile char view_data_height[MAX_SCREEN_LINE_WIDTH];
+volatile char view_data_height2[MAX_SCREEN_LINE_WIDTH];
+volatile char view_data_round[MAX_SCREEN_LINE_WIDTH];
+volatile char view_data_publicKey[MAX_SCREEN_LINE_WIDTH];
 int8_t data_round;
 int64_t data_height;
 
 //------ Event handlers
 delegate_accept_reference_signature eh_accept = NULL;
 delegate_reject_reference_signature eh_reject = NULL;
+delegate_validation_reset           eh_validation_reset = NULL;
+
+void view_set_validation_reset_eh(delegate_validation_reset delegate)
+{
+    eh_validation_reset = delegate;
+}
 
 void view_set_accept_eh(delegate_accept_reference_signature delegate)
 {
@@ -85,15 +93,15 @@ static const bagl_element_t bagl_ui_initialize_transaction[] = {
     UI_Icon(0, 0, 0, 7, 7, BAGL_GLYPH_ICON_CROSS),
     UI_Icon(0, 128 - 7, 0, 7, 7, BAGL_GLYPH_ICON_CHECK),
     UI_LabelLine(1, 0, 8, 128, 11, 0xFFFFFF, 0x000000, "Init validation"),
-    UI_LabelLine(1, 0, 19, 128, 11, 0xFFFFFF, 0x000000, (const char *)view_data_height),
-    UI_LabelLine(1, 0, 30, 128, 11, 0xFFFFFF, 0x000000, (const char *)view_data_round),
+    UI_LabelLine(1, 0, 19, 128, 11, 0xFFFFFF, 0x000000, "Test"), //(const char *)view_data_height),
+    UI_LabelLine(1, 0, 30, 128, 11, 0xFFFFFF, 0x000000, "Value"), //(const char *)view_data_round),
 };
 
 static const bagl_element_t bagl_ui_validating_transaction[] = {
     UI_FillRectangle(0, 0, 0, 128, 32, 0x000000, 0xFFFFFF),
     UI_LabelLine(1, 0, 8, 128, 11, 0xFFFFFF, 0x000000, "Validating"),
-    UI_LabelLineScrolling(1, 0, 19, 128, 11, 0xFFFFFF, 0x000000, (const char *)view_data_publicKey),
-    UI_LabelLine(1, 0, 30, 128, 11, 0xFFFFFF, 0x000000, (const char *)view_data_height),
+    UI_LabelLine(1, 0, 19, 128, 11, 0xFFFFFF, 0x000000, "Mama"),//(const char *)view_data_publicKey),
+    UI_LabelLine(1, 0, 30, 128, 11, 0xFFFFFF, 0x000000, "Mia"),//(const char *)view_data_height2),
 };
 
 
@@ -210,6 +218,9 @@ static unsigned int bagl_ui_validating_transaction_button(
     switch (button_mask) {
         // Press both left and right to switch to value scrolling
         case BUTTON_EVT_RELEASED | BUTTON_LEFT | BUTTON_RIGHT: {
+            if (eh_validation_reset != NULL) {
+                eh_validation_reset();
+            }
             view_display_main_menu();
             break;
         }
@@ -402,16 +413,18 @@ void view_display_validation_processing() {
 void view_set_height(int64_t height)
 {
     data_height = height;
-    snprintf((char*)view_data_height, MAX_CHARS_PER_VALUE_LINE, "Height: %d", (int)height);
+
+    //snprintf((char*)view_data_height, MAX_SCREEN_LINE_WIDTH, "Height: %d\n", (int)height);
+    //snprintf((char*)view_data_height2, MAX_SCREEN_LINE_WIDTH, "Height: %d\n", (int)height);
 }
 
 void view_set_round(int8_t round)
 {
     data_round = round;
-    snprintf((char*)view_data_round, MAX_CHARS_PER_VALUE_LINE, "Round: %d", round);
+    //snprintf((char*)view_data_round, MAX_SCREEN_LINE_WIDTH, "Round: %d\n", round);
 }
 
 void view_set_pubic_key(const char* publicKey)
 {
-    snprintf((char*)view_data_publicKey, MAX_CHARS_PER_VALUE_LINE, "PK: %s", publicKey);
+    //snprintf((char*)view_data_publicKey, MAX_SCREEN_LINE_WIDTH, "PK: %s\n", publicKey);
 }

@@ -30,8 +30,8 @@ extern "C" {
 /// \return height number
 int64_t  validation_parser_get_height(
         parsed_json_t* parsed_json,
-        char** next_char,
-        const char* raw_json);
+        const char* raw_json,
+        char* result);
 
 /// Extract round number from the json
 /// \param parsed_json, parsed json with validation message
@@ -39,8 +39,8 @@ int64_t  validation_parser_get_height(
 /// \return round number
 int8_t validation_parser_get_round(
         parsed_json_t* parsed_json,
-        char** next_char,
-        const char* raw_json);
+        const char* raw_json,
+        char* result);
 
 /// Validate validation json
 /// \param parsed_json, parsed json with validation message

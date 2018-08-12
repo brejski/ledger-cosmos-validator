@@ -225,15 +225,26 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
                     THROW(APDU_CODE_DATA_INVALID);
                 }
 
-                int8_t round = validation_parser_get_round(
+                char result = 0;
+                int8_t round = 0;
+                validation_parser_get_round(
                         validation_get_parsed(),
-                        NULL,
-                        (const char*)validation_get_buffer());
+                        (const char *) validation_get_buffer(),
+                        &result);
 
-                int64_t height = validation_parser_get_height(
+                if (result != 0) {
+                    THROW(APDU_CODE_DATA_INVALID);
+                }
+
+                int64_t height = 12;
+                validation_parser_get_height(
                         validation_get_parsed(),
-                        NULL,
-                        (const char*)validation_get_buffer());
+                        (const char *) validation_get_buffer(),
+                        &result);
+
+                if (result != 0) {
+                    THROW(APDU_CODE_DATA_INVALID);
+                }
 
                 if (validation_reference_get()->IsInitialized == 1) {
 
@@ -241,17 +252,21 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
                         ||
                         ((round == validation_reference_get()->CurrentRound)
                          && height > validation_reference_get()->CurrentHeight)) {
+
                         view_set_round(round);
                         view_set_height(height);
                         view_display_validation_processing();
-                        sign();
-                        validation_reference_get()->CurrentRound = round;
-                        validation_reference_get()->CurrentHeight = height;
-                    } else {
-                        THROW(APDU_CODE_DATA_INVALID);
+
+                        //sign();
+                        //validation_reference_get()->CurrentRound = round;
+                        //validation_reference_get()->CurrentHeight = height;
+
+                        //   } else {
+                        //THROW(APDU_CODE_DATA_INVALID);
+                        //     THROW(APDU_CODE_OK);
                     }
-                }
-                else {
+                    THROW(APDU_CODE_OK);
+                } else {
                     view_set_round(round);
                     view_set_height(height);
                     view_display_validation_init();
@@ -293,6 +308,19 @@ void reject_reference() {
     view_display_main_menu();
 }
 
+void accept_reference(int8_t round, int64_t height) {
+    validation_reference_get()->CurrentHeight = height;
+    validation_reference_get()->CurrentRound = round;
+    validation_reference_get()->IsInitialized = 1;
+    view_set_pubic_key("BABA");
+    //sign();
+
+    set_code(G_io_apdu_buffer, 0, APDU_CODE_OK);
+    io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX,  2);
+
+    view_display_validation_processing();
+}
+
 void sign()
 {
     // Generate keys
@@ -332,25 +360,15 @@ void sign()
     }
 }
 
-void accept_reference(int8_t round, int64_t height) {
-    validation_reference_get()->CurrentHeight = height;
-    validation_reference_get()->CurrentRound = round;
-    validation_reference_get()->IsInitialized = 1;
-    view_set_pubic_key("TODO");
-    sign();
-    view_display_validation_processing();
-}
-
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
 void app_main() {
     volatile uint32_t rx = 0, tx = 0, flags = 0;
 
     validation_reference_reset();
+    view_set_validation_reset_eh(&validation_reference_reset);
     view_set_accept_eh(&accept_reference);
     view_set_reject_eh(&reject_reference);
-    //view_add_reject_transaction_event_handler(&reject_transaction);
-    //view_add_sign_transaction_event_handler(&sign_transactio§§  n);
 
     for (;;) {
         volatile uint16_t sw = 0;
