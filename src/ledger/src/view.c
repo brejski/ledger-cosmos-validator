@@ -93,15 +93,15 @@ static const bagl_element_t bagl_ui_initialize_transaction[] = {
     UI_Icon(0, 0, 0, 7, 7, BAGL_GLYPH_ICON_CROSS),
     UI_Icon(0, 128 - 7, 0, 7, 7, BAGL_GLYPH_ICON_CHECK),
     UI_LabelLine(1, 0, 8, 128, 11, 0xFFFFFF, 0x000000, "Init validation"),
-    UI_LabelLine(1, 0, 19, 128, 11, 0xFFFFFF, 0x000000, "Test"), //(const char *)view_data_height),
-    UI_LabelLine(1, 0, 30, 128, 11, 0xFFFFFF, 0x000000, "Value"), //(const char *)view_data_round),
+    UI_LabelLine(1, 0, 19, 128, 11, 0xFFFFFF, 0x000000, (const char *)view_data_height),
+    UI_LabelLine(1, 0, 30, 128, 11, 0xFFFFFF, 0x000000, (const char *)view_data_round),
 };
 
 static const bagl_element_t bagl_ui_validating_transaction[] = {
     UI_FillRectangle(0, 0, 0, 128, 32, 0x000000, 0xFFFFFF),
     UI_LabelLine(1, 0, 8, 128, 11, 0xFFFFFF, 0x000000, "Validating"),
-    UI_LabelLine(1, 0, 19, 128, 11, 0xFFFFFF, 0x000000, "Mama"),//(const char *)view_data_publicKey),
-    UI_LabelLine(1, 0, 30, 128, 11, 0xFFFFFF, 0x000000, "Mia"),//(const char *)view_data_height2),
+    UI_LabelLine(1, 0, 19, 128, 11, 0xFFFFFF, 0x000000, (const char *)view_data_publicKey),
+    UI_LabelLine(1, 0, 30, 128, 11, 0xFFFFFF, 0x000000, (const char *)view_data_height2),
 };
 
 
@@ -413,18 +413,17 @@ void view_display_validation_processing() {
 void view_set_height(int64_t height)
 {
     data_height = height;
-
-    //snprintf((char*)view_data_height, MAX_SCREEN_LINE_WIDTH, "Height: %d\n", (int)height);
-    //snprintf((char*)view_data_height2, MAX_SCREEN_LINE_WIDTH, "Height: %d\n", (int)height);
+    snprintf((char*)view_data_height, MAX_SCREEN_LINE_WIDTH, "Height: %d\n", (int)height);
+    snprintf((char*)view_data_height2, MAX_SCREEN_LINE_WIDTH, "Height: %d\n", (int)height);
 }
 
 void view_set_round(int8_t round)
 {
     data_round = round;
-    //snprintf((char*)view_data_round, MAX_SCREEN_LINE_WIDTH, "Round: %d\n", round);
+    snprintf((char*)view_data_round, MAX_SCREEN_LINE_WIDTH, "Round: %d\n", round);
 }
 
 void view_set_pubic_key(const char* publicKey)
 {
-    //snprintf((char*)view_data_publicKey, MAX_SCREEN_LINE_WIDTH, "PK: %s\n", publicKey);
+    snprintf((char*)view_data_publicKey, MAX_SCREEN_LINE_WIDTH, "PK: %s\n", publicKey);
 }

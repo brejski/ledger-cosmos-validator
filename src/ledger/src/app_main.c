@@ -226,8 +226,7 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
                 }
 
                 char result = 0;
-                int8_t round = 0;
-                validation_parser_get_round(
+                int8_t round = validation_parser_get_round(
                         validation_get_parsed(),
                         (const char *) validation_get_buffer(),
                         &result);
@@ -236,8 +235,7 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
                     THROW(APDU_CODE_DATA_INVALID);
                 }
 
-                int64_t height = 12;
-                validation_parser_get_height(
+                int64_t height = validation_parser_get_height(
                         validation_get_parsed(),
                         (const char *) validation_get_buffer(),
                         &result);
@@ -255,17 +253,17 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
 
                         view_set_round(round);
                         view_set_height(height);
-                        view_display_validation_processing();
+
+                        //view_display_validation_processing();
 
                         //sign();
-                        //validation_reference_get()->CurrentRound = round;
-                        //validation_reference_get()->CurrentHeight = height;
 
-                        //   } else {
-                        //THROW(APDU_CODE_DATA_INVALID);
-                        //     THROW(APDU_CODE_OK);
+                        validation_reference_get()->CurrentRound = round;
+                        validation_reference_get()->CurrentHeight = height;
+                        THROW(APDU_CODE_OK);
+                    } else {
+                        THROW(APDU_CODE_DATA_INVALID);
                     }
-                    THROW(APDU_CODE_OK);
                 } else {
                     view_set_round(round);
                     view_set_height(height);
@@ -312,12 +310,11 @@ void accept_reference(int8_t round, int64_t height) {
     validation_reference_get()->CurrentHeight = height;
     validation_reference_get()->CurrentRound = round;
     validation_reference_get()->IsInitialized = 1;
-    view_set_pubic_key("BABA");
+    view_set_pubic_key("TODO");
     //sign();
 
     set_code(G_io_apdu_buffer, 0, APDU_CODE_OK);
-    io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX,  2);
-
+    io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, 2);
     view_display_validation_processing();
 }
 
@@ -352,11 +349,9 @@ void sign()
     if (result == 1) {
         set_code(G_io_apdu_buffer, length, APDU_CODE_OK);
         io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, length + 2);
-        //view_display_signing_success();
     } else {
         set_code(G_io_apdu_buffer, length, APDU_CODE_SIGN_VERIFY_ERROR);
         io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, length + 2);
-        //view_display_signing_error();
     }
 }
 
