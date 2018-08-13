@@ -12,9 +12,9 @@ Messages passed to the Ledger device will be in the following format. The Ledger
 
 ```json
 {
-  "height": number,
-  "other": string,
-  "round": number
+  "height": number,       // Required
+  "other": string,        // Dummy fields.. anything apart from height and round should be ignored
+  "round": number         // Required
 }
 ```
 
@@ -24,6 +24,8 @@ Messages passed to the Ledger device will be in the following format. The Ledger
 ### Validation
 
 The Ledger device MUST validate that supplied JSON is valid. Our JSON specification is a subset of [RFC 7159](https://tools.ietf.org/html/rfc7159) - invalid RFC 7159 JSON is invalid Ledger JSON, but not all valid RFC 7159 JSON is valid Ledger JSON.
+
+Comments are **not** supported.
 
 We add the following two rules:
 - No spaces or newlines can be included, other than escaped in strings
