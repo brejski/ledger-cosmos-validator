@@ -159,6 +159,12 @@ void view_display_main_menu() {
     UX_MENU_DISPLAY(0, menu_main, NULL);
 }
 
+const bagl_element_t *ui_validation_processing_prepro(const bagl_element_t *element) {
+
+    UX_CALLBACK_SET_INTERVAL(50);
+    return element;
+}
+
 void view_display_validation_init() {
 
     view_uiState = UI_VALIDAITON_INIT;
@@ -168,7 +174,7 @@ void view_display_validation_init() {
 void view_display_validation_processing() {
 
     view_uiState = UI_VALIDATION_PROCESSING;
-    UX_DISPLAY(bagl_ui_validating_transaction, NULL);
+    UX_DISPLAY(bagl_ui_validating_transaction, ui_validation_processing_prepro);
 }
 
 void view_set_height(int64_t height)

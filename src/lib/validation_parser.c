@@ -19,6 +19,7 @@
 #include "validation_parser.h"
 #include "json_parser.h"
 #include <limits.h>
+#include <zxmacros.h>
 
 //---------------------------------------------
 
@@ -182,72 +183,6 @@ const char* json_validate(parsed_json_t* parsed_json,
     }
 
     return NULL;
-}
-
-int8_t str_to_int8(const char *start, const char* end, char* error) {
-
-    int sign = 1;
-    if (*start == '-') {
-        sign = -1;
-        start++;
-    }
-
-    int64_t value = 0;
-    int multiplier = 1;
-    for (const char *s = end-1; s >= start; s--) {
-        int delta = (*s - '0');
-        if (delta >= 0 && delta <= 9) {
-            value += (delta * multiplier);
-            multiplier *= 10;
-        } else {
-            if (error != NULL) {
-                *error = 1;
-                return 0;
-            }
-        }
-    }
-
-    value *= sign;
-    if (value >= INT8_MIN && value <= INT8_MAX) {
-        return (int8_t)value;
-    }
-    if (error != NULL) {
-        *error = 1;
-    }
-    return 0;
-}
-
-int64_t str_to_int64(const char *start, const char* end, char* error) {
-
-    int sign = 1;
-    if (*start == '-') {
-        sign = -1;
-        start++;
-    }
-
-    int64_t value = 0;
-    uint64_t multiplier = 1;
-    for (const char *s = end-1; s >= start; s--) {
-        int delta = (*s - '0');
-        if (delta >= 0 && delta <= 9) {
-            value += (delta * multiplier);
-            multiplier *= 10;
-        } else {
-            if (error != NULL) {
-                *error = 1;
-                return 0;
-            }
-        }
-    }
-
-    value *= sign;
-    if (value >= INT64_MIN && value <= INT64_MAX) {
-        return value;
-    }
-    if (error != NULL) {
-        *error = 1;
-    }
-    return 0;
 }
 
 int64_t validation_parser_get_height(
