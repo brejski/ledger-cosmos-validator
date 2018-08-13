@@ -271,6 +271,7 @@ func testSECP256K1Message(message []byte, ledger *ledger_goclient.Ledger, i int)
 
 	fmt.Printf("Message %d - Valid signature\n", i)
 }
+
 func testSECP256K1(messages []auth.StdSignMsg, ledger *ledger_goclient.Ledger) {
 	fmt.Printf("\nTesting valid messages:\n")
 	for i := 0; i < len(messages); i++ {
@@ -286,6 +287,32 @@ func testSECP256K1(messages []auth.StdSignMsg, ledger *ledger_goclient.Ledger) {
 	testSECP256K1Message(invalid_msg_not_sorted_dictionaries, ledger, 1)
 }
 
+func testAutomaticValidation(ledger *ledger_goclient.Ledger) {
+	fmt.Printf("\nTesting automatic validation:\n")
+	fmt.Printf("\nSending initialization message:\n")
+
+	path := []uint32{44, 60, 0, 0, 0}
+	message := []byte("{\"height\":0,\"other\":\"Some dummy data\",\"round\":0}")
+	_, err := ledger.SignED25519(path, message)
+	if err != nil {
+		fmt.Printf("[Sign] Error: %s\n", err)
+	}
+
+	fmt.Printf("\nSending next message:\n")
+	message = []byte("{\"height\":1,\"other\":\"Some dummy data\",\"round\":0}")
+	_, err = ledger.SignED25519(path, message)
+	if err != nil {
+		fmt.Printf("[Sign] Error: %s\n", err)
+	}
+
+	fmt.Printf("\nSending next message:\n")
+	message = []byte("{\"height\":2,\"other\":\"Some dummy data\",\"round\":0}")
+	_, err = ledger.SignED25519(path, message)
+	if err != nil {
+		fmt.Printf("[Sign] Error: %s\n", err)
+	}
+}
+
 func main() {
 	ledger, err := ledger_goclient.FindLedger()
 
@@ -296,7 +323,8 @@ func main() {
 	} else {
 		ledger.Logging = true
 
-		testSECP256K1(GetExampleTxs(), ledger)
+		testAutomaticValidation(ledger)
+		//testSECP256K1(GetExampleTxs(), ledger)
 		//testED25519(GetExampleTxs(), ledger)
 	}
 }

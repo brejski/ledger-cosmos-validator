@@ -16,9 +16,9 @@
 
 #include <jsmn.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include "validation_parser.h"
 #include "json_parser.h"
+#include <limits.h>
 
 //---------------------------------------------
 
@@ -170,34 +170,107 @@ const char* json_validate(parsed_json_t* parsed_json,
         return "Missing other";
     }
 
-    char* next_pos;
-    validation_parser_get_height(parsed_json, &next_pos, raw_json);
-    if (next_pos != (raw_json + parsed_json->Tokens[height_token_index].end)) {
+    char result = 0;
+    validation_parser_get_height(parsed_json, raw_json, &result);
+    if (result != 0) {
         return "Could not parse height";
     }
 
-    validation_parser_get_round(parsed_json, &next_pos, raw_json);
-    if (next_pos != (raw_json + parsed_json->Tokens[round_token_index].end)) {
+    validation_parser_get_round(parsed_json, raw_json, &result);
+    if (result != 0) {
         return "Could not parse round";
     }
 
     return NULL;
 }
 
+int8_t str_to_int8(const char *start, const char* end, char* error) {
+
+    int sign = 1;
+    if (*start == '-') {
+        sign = -1;
+        start++;
+    }
+
+    int64_t value = 0;
+    int multiplier = 1;
+    for (const char *s = end-1; s >= start; s--) {
+        int delta = (*s - '0');
+        if (delta >= 0 && delta <= 9) {
+            value += (delta * multiplier);
+            multiplier *= 10;
+        } else {
+            if (error != NULL) {
+                *error = 1;
+                return 0;
+            }
+        }
+    }
+
+    value *= sign;
+    if (value >= INT8_MIN && value <= INT8_MAX) {
+        return (int8_t)value;
+    }
+    if (error != NULL) {
+        *error = 1;
+    }
+    return 0;
+}
+
+int64_t str_to_int64(const char *start, const char* end, char* error) {
+
+    int sign = 1;
+    if (*start == '-') {
+        sign = -1;
+        start++;
+    }
+
+    int64_t value = 0;
+    uint64_t multiplier = 1;
+    for (const char *s = end-1; s >= start; s--) {
+        int delta = (*s - '0');
+        if (delta >= 0 && delta <= 9) {
+            value += (delta * multiplier);
+            multiplier *= 10;
+        } else {
+            if (error != NULL) {
+                *error = 1;
+                return 0;
+            }
+        }
+    }
+
+    value *= sign;
+    if (value >= INT64_MIN && value <= INT64_MAX) {
+        return value;
+    }
+    if (error != NULL) {
+        *error = 1;
+    }
+    return 0;
+}
+
 int64_t validation_parser_get_height(
-        parsed_json_t* parsed_json,
-        char** next_char,
-        const char* raw_json)
-{
+    parsed_json_t* parsed_json,
+    const char* raw_json,
+    char* result) {
     int token_index = object_get_value(0, "height", parsed_json, raw_json);
-    return strtoll(raw_json + parsed_json->Tokens[token_index].start, next_char, 10);
+
+    return str_to_int64(
+            raw_json + parsed_json->Tokens[token_index].start,
+            raw_json + parsed_json->Tokens[token_index].end,
+            result);
 }
 
 int8_t validation_parser_get_round(
         parsed_json_t* parsed_json,
-        char** next_char,
-        const char* raw_json)
+        const char* raw_json,
+        char* result)
 {
     int token_index = object_get_value(0, "round", parsed_json, raw_json);
-    return strtol(raw_json + parsed_json->Tokens[token_index].start, next_char, 10);
+
+    return str_to_int8(
+            raw_json + parsed_json->Tokens[token_index].start,
+            raw_json + parsed_json->Tokens[token_index].end,
+            result);
 }

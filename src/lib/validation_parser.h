@@ -18,7 +18,7 @@
 #define CI_TEST_VALIDATIONPARSER_H
 
 #include "json_parser.h"
-#include <stdlib.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,8 +30,8 @@ extern "C" {
 /// \return height number
 int64_t  validation_parser_get_height(
         parsed_json_t* parsed_json,
-        char** next_char,
-        const char* raw_json);
+        const char* raw_json,
+        char* result);
 
 /// Extract round number from the json
 /// \param parsed_json, parsed json with validation message
@@ -39,8 +39,8 @@ int64_t  validation_parser_get_height(
 /// \return round number
 int8_t validation_parser_get_round(
         parsed_json_t* parsed_json,
-        char** next_char,
-        const char* raw_json);
+        const char* raw_json,
+        char* result);
 
 /// Validate validation json
 /// \param parsed_json, parsed json with validation message
@@ -49,6 +49,12 @@ int8_t validation_parser_get_round(
 const char* json_validate(
         parsed_json_t* parsed_json,
         const char* raw_json);
+
+typedef struct {
+    int64_t CurrentHeight;
+    int8_t  IsInitialized;
+    int8_t  CurrentRound;
+} validation_reference_t;
 
 //---------------------------------------------
 // Delegates

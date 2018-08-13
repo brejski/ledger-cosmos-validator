@@ -15,6 +15,7 @@
 ********************************************************************************/
 
 #include "validation.h"
+
 #include "view.h"
 #include "apdu_codes.h"
 #include "json_parser.h"
@@ -34,6 +35,7 @@ storage_t N_appdata_impl __attribute__ ((aligned(64)));
 #define N_appdata (*(storage_t *)PIC(&N_appdata_impl))
 
 parsed_json_t parsed_json;
+validation_reference_t validation_reference;
 
 void update_ram(buffer_state_t *buffer, uint8_t *data, int size) {
     os_memmove(buffer->data + buffer->pos, data, size);
@@ -41,6 +43,16 @@ void update_ram(buffer_state_t *buffer, uint8_t *data, int size) {
 
 void update_flash(buffer_state_t *buffer, uint8_t *data, int size) {
     nvm_write((void *) buffer->data + buffer->pos, data, size);
+}
+
+void validation_reference_reset()
+{
+    os_memset(&validation_reference, 0, sizeof(validation_reference_t));
+}
+
+validation_reference_t* validation_reference_get()
+{
+    return &validation_reference;
 }
 
 void validation_initialize() {
@@ -69,7 +81,7 @@ uint32_t validation_get_buffer_length() {
     return buffering_get_buffer()->pos;
 }
 
-uint8_t* validation_get_buffer() {
+const uint8_t* validation_get_buffer() {
     return buffering_get_buffer()->data;
 }
 
@@ -95,6 +107,6 @@ const char* validation_parse() {
     return NULL;
 }
 
-parsed_json_t *validation_get_parsed() {
+parsed_json_t* validation_get_parsed() {
     return &parsed_json;
 }
