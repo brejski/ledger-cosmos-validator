@@ -12,14 +12,17 @@ Messages passed to the Ledger device will be in the following format. The Ledger
 
 ```json
 {
-  "height": number,       // Required
-  "other": string,        // Dummy fields.. anything apart from height and round should be ignored
-  "round": number         // Required
+  "height": number,
+  "other": string,
+  "round": number
 }
 ```
 
-- round number has int8 type
-- height number has int64 type
+- round: int8 
+- height: int64
+- other: dummy field
+
+all fields apart from round and height will be ignored
 
 ### Validation
 
