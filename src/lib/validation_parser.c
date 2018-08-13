@@ -19,6 +19,7 @@
 #include "validation_parser.h"
 #include "json_parser.h"
 #include <limits.h>
+#include <zxmacros.h>
 
 //---------------------------------------------
 
