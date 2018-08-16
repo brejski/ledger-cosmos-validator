@@ -17,9 +17,8 @@
 package main
 
 import (
-	"fmt"
 	"testing"
-	cosmos_api "github.com/ZondaX/ledger-cosmos-go"
+	cosmosapi "github.com/ZondaX/ledger-cosmos-go"
 )
 
 ////---------------------------------------------------------------
@@ -310,12 +309,14 @@ import (
 //}
 
 func Test_AutomaticValidation(t *testing.T) {
-	fmt.Printf("\nTesting automatic validation:\n")
-	fmt.Printf("\nSending initialization message:\n")
+	validatorApp, _ := cosmosapi.FindLedgerCosmosValidator()
 
-	validatorApp, _ := cosmos_api.FindLedgerCosmosValidator()
-
-
+	version, err := validatorApp.GetVersion()
+	require.Nil(t, err, "Detected error")
+	assert.Equal(t, uint8(0xFF), version.AppId, "TESTING MODE NOT ENABLED")
+	assert.Equal(t, uint8(0x0), version.Major, "Wrong Major version")
+	assert.Equal(t, uint8(0x0), version.Minor, "Wrong Minor version")
+	assert.Equal(t, uint8(0xA), version.Patch, "Wrong Patch version")
 
 
 	//path := []uint32{44, 60, 0, 0, 0}
