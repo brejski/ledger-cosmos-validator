@@ -1,5 +1,5 @@
 [[constraint]]
-  name = "github.com/zondax/ledger-cosmos-go"
+  name = "github.com/ZondaX/ledger-cosmos-go"
   branch = "master"
 
 [prune]

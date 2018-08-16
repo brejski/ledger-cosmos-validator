@@ -3,11 +3,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:89780bbf917ea08b81a556bad5664be82d4d5372c6b983de68a824d0e39c80a5"
+  digest = "1:aabf8c9db6857dc669ba60ec44fb3c18636cac179d93de8faa595f93cbac08a0"
   name = "github.com/ZondaX/ledger-cosmos-go"
   packages = ["."]
   pruneopts = "UT"
-  revision = "96988ba010d1d18642328fbae643728a0640d432"
+  revision = "22f012fff9188b71dffa0fe332915204fb38ed4d"
 
 [[projects]]
   branch = "master"
