@@ -172,12 +172,12 @@ const char* json_validate(parsed_json_t* parsed_json,
     }
 
     char result = 0;
-    validation_parser_get_height(parsed_json, raw_json, &result);
+    validation_parser_get_msg_height(parsed_json, raw_json, &result);
     if (result != 0) {
         return "Could not parse height";
     }
 
-    validation_parser_get_round(parsed_json, raw_json, &result);
+    validation_parser_get_msg_round(parsed_json, raw_json, &result);
     if (result != 0) {
         return "Could not parse round";
     }
@@ -185,10 +185,10 @@ const char* json_validate(parsed_json_t* parsed_json,
     return NULL;
 }
 
-int64_t validation_parser_get_height(
-    parsed_json_t* parsed_json,
-    const char* raw_json,
-    char* result) {
+int64_t validation_parser_get_msg_height(
+    parsed_json_t *parsed_json,
+    const char *raw_json,
+    char *result) {
     int token_index = object_get_value(0, "height", parsed_json, raw_json);
 
     return str_to_int64(
@@ -197,10 +197,10 @@ int64_t validation_parser_get_height(
             result);
 }
 
-int8_t validation_parser_get_round(
-        parsed_json_t* parsed_json,
-        const char* raw_json,
-        char* result)
+int8_t validation_parser_get_msg_round(
+    parsed_json_t *parsed_json,
+    const char *raw_json,
+    char *result)
 {
     int token_index = object_get_value(0, "round", parsed_json, raw_json);
 

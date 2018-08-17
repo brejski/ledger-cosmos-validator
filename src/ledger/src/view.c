@@ -41,10 +41,13 @@ enum UI_STATE view_uiState;
 enum UI_DISPLAY_MODE scrolling_mode;
 
 volatile char view_data_height[MAX_SCREEN_LINE_WIDTH];
-volatile char view_data_round[MAX_SCREEN_LINE_WIDTH];
+volatile char view_data_msg_round[MAX_SCREEN_LINE_WIDTH];
+
+volatile char view_data_state[MAX_SCREEN_LINE_WIDTH];
+
 volatile char view_data_publicKey[MAX_SCREEN_LINE_WIDTH];
-int8_t data_round;
-int64_t data_height;
+int8_t data_msg_round;
+int64_t data_msg_height;
 
 //------ Event handlers
 delegate_accept_reference_signature eh_accept = NULL;
@@ -93,14 +96,18 @@ static const bagl_element_t bagl_ui_initialize_transaction[] = {
     UI_Icon(0, 128 - 7, 0, 7, 7, BAGL_GLYPH_ICON_CHECK),
     UI_LabelLine(1, 0, 8, 128, 11, 0xFFFFFF, 0x000000, "Init validation"),
     UI_LabelLine(1, 0, 19, 128, 11, 0xFFFFFF, 0x000000, (const char *)view_data_height),
-    UI_LabelLine(1, 0, 30, 128, 11, 0xFFFFFF, 0x000000, (const char *)view_data_round),
+    UI_LabelLine(1, 0, 30, 128, 11, 0xFFFFFF, 0x000000, (const char *)view_data_msg_round),
 };
 
 static const bagl_element_t bagl_ui_validating_transaction[] = {
     UI_FillRectangle(0, 0, 0, 128, 32, 0x000000, 0xFFFFFF),
     UI_LabelLine(1, 0, 8, 128, 11, 0xFFFFFF, 0x000000, "Validating"),
-    UI_LabelLine(1, 0, 19, 128, 11, 0xFFFFFF, 0x000000, (const char *)view_data_publicKey),
-    UI_LabelLine(1, 0, 30, 128, 11, 0xFFFFFF, 0x000000, (const char *)view_data_height),
+
+    // 4 labels..
+    // "Height:" [value]
+    // "PK"      [PK]
+    UI_LabelLine(1, 0, 19, 128, 11, 0xFFFFFF, 0x000000, (const char *)view_data_state),
+    UI_LabelLineScrolling(1, 0, 30, 128, 11, 0xFFFFFF, 0x000000, (const char *)view_data_publicKey),
 };
 
 static unsigned int bagl_ui_initialize_transaction_button(
@@ -120,7 +127,7 @@ static unsigned int bagl_ui_initialize_transaction_button(
         // Press right to progress to the next element
         case BUTTON_EVT_RELEASED | BUTTON_RIGHT: {
             if (eh_accept != NULL) {
-                eh_accept(data_round, data_height);
+                eh_accept(data_msg_round, data_msg_height);
             }
             break;
         }
@@ -133,14 +140,15 @@ static unsigned int bagl_ui_validating_transaction_button(
         unsigned int button_mask_counter) {
 
     switch (button_mask) {
-        // Press both left and right to switch to value scrolling
-        case BUTTON_EVT_RELEASED | BUTTON_LEFT | BUTTON_RIGHT: {
-            if (eh_validation_reset != NULL) {
-                eh_validation_reset();
-            }
-            view_display_main_menu();
-            break;
-        }
+        // We dont allow people to exit this mode
+//        // Press both left and right to switch to value scrolling
+//        case BUTTON_EVT_RELEASED | BUTTON_LEFT | BUTTON_RIGHT: {
+//            if (eh_validation_reset != NULL) {
+//                eh_validation_reset();
+//            }
+//            view_display_main_menu();
+//            break;
+//        }
     }
     return 0;
 }
@@ -177,19 +185,26 @@ void view_display_validation_processing() {
     UX_DISPLAY(bagl_ui_validating_transaction, ui_validation_processing_prepro);
 }
 
-void view_set_height(int64_t height)
+void view_set_state(int8_t msg_round, int64_t msg_height)
 {
-    data_height = height;
-    snprintf((char*)view_data_height, MAX_SCREEN_LINE_WIDTH, "Height: %d\n", (int)height);
+    // TODO: Output 64 bits properly
+    snprintf((char*)view_data_state, MAX_SCREEN_LINE_WIDTH, "%d-%03d\n", (int)msg_height, msg_round);
 }
 
-void view_set_round(int8_t round)
+void view_set_msg_height(int64_t height)
 {
-    data_round = round;
-    snprintf((char*)view_data_round, MAX_SCREEN_LINE_WIDTH, "Round: %d\n", round);
+    // TODO: Output 64 bits properly
+    data_msg_height = height;
+    snprintf((char*)view_data_msg_round, MAX_SCREEN_LINE_WIDTH, "Height: %d\n", (int)data_msg_height);
 }
 
-void view_set_pubic_key(const char* publicKey)
+void view_set_msg_round(int8_t msg_round)
+{
+    data_msg_round = msg_round;
+    snprintf((char*)view_data_msg_round, MAX_SCREEN_LINE_WIDTH, "Round: %03d\n", data_msg_round);
+}
+
+void view_set_public_key(const char* publicKey)
 {
     snprintf((char*)view_data_publicKey, MAX_SCREEN_LINE_WIDTH, "PK: %s\n", publicKey);
 }
