@@ -28,6 +28,7 @@
 
 uint8_t bip32_depth;
 uint32_t bip32_path[10];
+unsigned char public_key[32];
 
 unsigned char G_io_seproxyhal_spi_buffer[IO_SEPROXYHAL_BUFFER_SIZE_B];
 

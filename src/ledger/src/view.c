@@ -42,11 +42,10 @@ enum UI_STATE view_uiState;
 enum UI_DISPLAY_MODE scrolling_mode;
 
 volatile char view_data_height[MAX_SCREEN_LINE_WIDTH];
-volatile char view_data_msg_round[MAX_SCREEN_LINE_WIDTH];
-
+volatile char view_data_round[MAX_SCREEN_LINE_WIDTH];
 volatile char view_data_state[MAX_SCREEN_LINE_WIDTH];
-
 volatile char view_data_publicKey[MAX_SCREEN_LINE_WIDTH];
+
 int8_t data_msg_round;
 int64_t data_msg_height;
 
@@ -97,7 +96,7 @@ static const bagl_element_t bagl_ui_initialize_transaction[] = {
     UI_Icon(0, 128 - 7, 0, 7, 7, BAGL_GLYPH_ICON_CHECK),
     UI_LabelLine(1, 0, 8, 128, 11, 0xFFFFFF, 0x000000, "Init validation"),
     UI_LabelLine(1, 0, 19, 128, 11, 0xFFFFFF, 0x000000, (const char *)view_data_height),
-    UI_LabelLine(1, 0, 30, 128, 11, 0xFFFFFF, 0x000000, (const char *)view_data_msg_round),
+    UI_LabelLine(1, 0, 30, 128, 11, 0xFFFFFF, 0x000000, (const char *)view_data_round),
 };
 
 static const bagl_element_t bagl_ui_validating_transaction[] = {
@@ -190,23 +189,21 @@ void view_set_state(int8_t msg_round, int64_t msg_height)
 {
     char int64str[] = "-9223372036854775808";
     int64_to_str(int64str, sizeof(int64str), msg_height);
-    snprintf((char*)view_data_height, MAX_SCREEN_LINE_WIDTH, "%s-%03d\n", int64str, msg_round);
+    snprintf((char*)view_data_state, MAX_SCREEN_LINE_WIDTH, "%s-%03d\n", int64str, msg_round);
 }
 
 void view_set_msg_height(int64_t height)
 {
     char int64str[] = "-9223372036854775808";
     int64_to_str(int64str, sizeof(int64str), height);
-    
-    // TODO: Output 64 bits properly
     data_msg_height = height;
-    snprintf((char*)view_data_msg_round, MAX_SCREEN_LINE_WIDTH, "Height: %s\n", int64str);
+    snprintf((char*)view_data_height, MAX_SCREEN_LINE_WIDTH, "Height: %s\n", int64str);
 }
 
 void view_set_msg_round(int8_t msg_round)
 {
     data_msg_round = msg_round;
-    snprintf((char*)view_data_msg_round, MAX_SCREEN_LINE_WIDTH, "Round: %03d\n", data_msg_round);
+    snprintf((char*)view_data_round, MAX_SCREEN_LINE_WIDTH, "Round: %03d\n", data_msg_round);
 }
 
 void view_set_public_key(const char* publicKey)
