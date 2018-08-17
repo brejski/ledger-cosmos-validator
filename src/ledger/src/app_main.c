@@ -40,6 +40,8 @@ const uint8_t privateKeyDataTest[] = {
 
 uint8_t bip32_depth;
 uint32_t bip32_path[10];
+unsigned char public_key[32];
+
 sigtype_t current_sigtype;
 
 unsigned char G_io_seproxyhal_spi_buffer[IO_SEPROXYHAL_BUFFER_SIZE_B];
@@ -158,6 +160,26 @@ bool process_chunk(volatile uint32_t *tx, uint32_t rx, bool getBip32) {
     return packageIndex == packageCount;
 }
 
+void extract_public_key()
+{
+    cx_ecfp_public_key_t publicKey;
+    cx_ecfp_private_key_t privateKey;
+    uint8_t privateKeyData[32];
+
+    // Generate keys
+    os_perso_derive_node_bip32(
+            CX_CURVE_Ed25519,
+            bip32_path,
+            bip32_depth,
+            privateKeyData,
+            NULL);
+
+    keys_ed25519(&publicKey, &privateKey, privateKeyData);
+    memset(privateKeyData, 0, 32);
+
+    extractPubKey(public_key, &publicKey);
+}
+
 void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
     uint16_t sw = 0;
 
@@ -193,22 +215,10 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
                     THROW(APDU_CODE_DATA_INVALID);
                 }
 
-                cx_ecfp_public_key_t publicKey;
-                cx_ecfp_private_key_t privateKey;
-                uint8_t privateKeyData[32];
+                extract_public_key();
 
-                // Generate keys
-                os_perso_derive_node_bip32(
-                    CX_CURVE_Ed25519,
-                    bip32_path, bip32_depth,
-                    privateKeyData, NULL);
-                keys_ed25519(&publicKey, &privateKey, privateKeyData);
-                memset(privateKeyData, 0, 32);
-
-                unsigned char output[32];
-                extractPubKey(output, &publicKey);
-                os_memmove(G_io_apdu_buffer, output, sizeof(output));
-                *tx += sizeof(output);
+                os_memmove(G_io_apdu_buffer, public_key, sizeof(public_key));
+                *tx += sizeof(public_key);
 
                 THROW(APDU_CODE_OK);
             }
@@ -265,6 +275,10 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
                 } else {
                     view_set_round(round);
                     view_set_height(height);
+
+                    // We need to extract public key here but this is not working
+                    //extract_public_key();
+
                     view_display_validation_init();
                     *flags |= IO_ASYNCH_REPLY;
                 }
@@ -308,7 +322,11 @@ void accept_reference(int8_t round, int64_t height) {
     validation_reference_get()->CurrentHeight = height;
     validation_reference_get()->CurrentRound = round;
     validation_reference_get()->IsInitialized = 1;
-    view_set_pubic_key("TODO");
+
+    // TODO: Public key not implemented
+    strcpy((char*)public_key, "TODO");
+    view_set_pubic_key(public_key);
+
     set_code(G_io_apdu_buffer, 0, APDU_CODE_OK);
     io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, 2);
     view_display_validation_processing();

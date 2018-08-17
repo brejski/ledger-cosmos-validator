@@ -25,6 +25,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <inttypes.h>
+#include <zxmacros.h>
 
 #define TRUE  1
 #define FALSE 0
@@ -42,7 +43,7 @@ enum UI_DISPLAY_MODE scrolling_mode;
 
 volatile char view_data_height[MAX_SCREEN_LINE_WIDTH];
 volatile char view_data_round[MAX_SCREEN_LINE_WIDTH];
-volatile char view_data_publicKey[MAX_SCREEN_LINE_WIDTH];
+volatile char view_data_publicKey[MAX_CHARS_PER_VALUE_LINE];
 int8_t data_round;
 int64_t data_height;
 
@@ -180,7 +181,9 @@ void view_display_validation_processing() {
 void view_set_height(int64_t height)
 {
     data_height = height;
-    snprintf((char*)view_data_height, MAX_SCREEN_LINE_WIDTH, "Height: %d\n", (int)height);
+    char int64str[] = "-9223372036854775808";
+    int64_to_str(int64str, sizeof(int64str), height);
+    snprintf((char*)view_data_height, MAX_SCREEN_LINE_WIDTH, "Height: %s\n", int64str);
 }
 
 void view_set_round(int8_t round)
@@ -189,7 +192,7 @@ void view_set_round(int8_t round)
     snprintf((char*)view_data_round, MAX_SCREEN_LINE_WIDTH, "Round: %d\n", round);
 }
 
-void view_set_pubic_key(const char* publicKey)
+void view_set_pubic_key(const uint8_t* publicKey)
 {
-    snprintf((char*)view_data_publicKey, MAX_SCREEN_LINE_WIDTH, "PK: %s\n", publicKey);
+    snprintf((char*)view_data_publicKey, MAX_CHARS_PER_VALUE_LINE, "PK: %s\n", publicKey);
 }

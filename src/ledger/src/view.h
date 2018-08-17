@@ -52,7 +52,7 @@ void view_display_main_menu();
 
 void view_set_height(int64_t height);
 void view_set_round(int8_t round);
-void view_set_pubic_key(const char* publicKey);
+void view_set_pubic_key(const uint8_t* publicKey);
 
 void view_display_validation_init();
 void view_display_validation_processing();
