@@ -28,19 +28,19 @@ extern "C" {
 /// \param parsed_json, parsed json with validation message
 /// \param raw_json, raw json with validation message
 /// \return height number
-int64_t  validation_parser_get_height(
-        parsed_json_t* parsed_json,
-        const char* raw_json,
-        char* result);
+int64_t  validation_parser_get_msg_height(
+    parsed_json_t *parsed_json,
+    const char *raw_json,
+    char *result);
 
 /// Extract round number from the json
 /// \param parsed_json, parsed json with validation message
 /// \param raw_json, raw json with validation message
 /// \return round number
-int8_t validation_parser_get_round(
-        parsed_json_t* parsed_json,
-        const char* raw_json,
-        char* result);
+int8_t validation_parser_get_msg_round(
+    parsed_json_t *parsed_json,
+    const char *raw_json,
+    char *result);
 
 /// Validate validation json
 /// \param parsed_json, parsed json with validation message
@@ -53,7 +53,7 @@ const char* json_validate(
 typedef struct {
     int64_t CurrentHeight;
     int8_t  IsInitialized;
-    int8_t  CurrentRound;
+    int8_t  CurrentMsgRound;
 } validation_reference_t;
 
 //---------------------------------------------

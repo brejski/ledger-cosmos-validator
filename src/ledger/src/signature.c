@@ -55,21 +55,5 @@ int sign_ed25519(const uint8_t *message,
         &info);
 
     os_memset(privateKey, 0, sizeof(privateKey));
-
-#ifdef TESTING_ENABLED
-// TEMPORARILY DISABLED
-//    return cx_eddsa_verify(
-//            &publicKey,
-//            0,
-//            CX_SHA512,
-//            message_digest,
-//            CX_SHA512_SIZE,
-//            NULL,
-//            0,
-//            signature,
-//            *signature_length);
     return 1;
-#else
-    return 1;
-#endif
 }

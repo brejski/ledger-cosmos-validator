@@ -21,7 +21,7 @@
 
 #define MAX_CHARS_PER_KEY_LINE      64
 #define MAX_CHARS_PER_VALUE_LINE    128
-#define MAX_SCREEN_LINE_WIDTH       22
+#define MAX_SCREEN_LINE_WIDTH       60
 
 enum UI_STATE {
     UI_MAIN_MENU,
@@ -32,7 +32,7 @@ enum UI_STATE {
 extern enum UI_STATE view_uiState;
 
 //------ Delegates definitions
-typedef void (*delegate_accept_reference_signature)(int8_t round, int64_t height);
+typedef void (*delegate_accept_reference_signature)(int8_t msg_round, int64_t height);
 typedef void (*delegate_reject_reference_signature)();
 typedef void (*delegate_validation_reset)();
 
@@ -50,9 +50,10 @@ void view_set_reject_eh(delegate_reject_reference_signature delegate);
 void view_init();
 void view_display_main_menu();
 
-void view_set_height(int64_t height);
-void view_set_round(int8_t round);
-void view_set_pubic_key(const uint8_t* publicKey);
+void view_set_state(int8_t msg_round, int64_t msg_height);
+void view_set_msg_height(int64_t height);
+void view_set_msg_round(int8_t msg_round);
+void view_set_public_key(const char* publicKey);
 
 void view_display_validation_init();
 void view_display_validation_processing();

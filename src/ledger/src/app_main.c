@@ -26,23 +26,8 @@
 #include <string.h>
 #include "validation_parser.h"
 
-#ifdef TESTING_ENABLED
-// Generate using always the same private data
-// to allow for reproducible results
-const uint8_t privateKeyDataTest[] = {
-        0x75, 0x56, 0x0e, 0x4d, 0xde, 0xa0, 0x63, 0x05,
-        0xc3, 0x6e, 0x2e, 0xb5, 0xf7, 0x2a, 0xca, 0x71,
-        0x2d, 0x13, 0x4c, 0xc2, 0xa0, 0x59, 0xbf, 0xe8,
-        0x7e, 0x9b, 0x5d, 0x55, 0xbf, 0x81, 0x3b, 0xd4
-};
-
-#endif
-
 uint8_t bip32_depth;
 uint32_t bip32_path[10];
-unsigned char public_key[32];
-
-sigtype_t current_sigtype;
 
 unsigned char G_io_seproxyhal_spi_buffer[IO_SEPROXYHAL_BUFFER_SIZE_B];
 
@@ -221,6 +206,7 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
                 *tx += sizeof(public_key);
 
                 THROW(APDU_CODE_OK);
+                break;
             }
 
             case INS_SIGN_ED25519: {
@@ -236,7 +222,7 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
                 }
 
                 char result = 0;
-                int8_t round = validation_parser_get_round(
+                int8_t msg_round = validation_parser_get_msg_round(
                         validation_get_parsed(),
                         (const char *) validation_get_buffer(),
                         &result);
@@ -245,7 +231,7 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
                     THROW(APDU_CODE_DATA_INVALID);
                 }
 
-                int64_t height = validation_parser_get_height(
+                int64_t height = validation_parser_get_msg_height(
                         validation_get_parsed(),
                         (const char *) validation_get_buffer(),
                         &result);
@@ -254,33 +240,27 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
                     THROW(APDU_CODE_DATA_INVALID);
                 }
 
-                if (validation_reference_get()->IsInitialized == 1) {
-
-                    if ((round > validation_reference_get()->CurrentRound)
-                        ||
-                        ((round == validation_reference_get()->CurrentRound)
-                         && height > validation_reference_get()->CurrentHeight)) {
-
-                        view_set_round(round);
-                        view_set_height(height);
-
-                        validation_reference_get()->CurrentRound = round;
-                        validation_reference_get()->CurrentHeight = height;
-
-                        current_sigtype = ED25519;
-                        sign(tx);
-                    } else {
-                        THROW(APDU_CODE_DATA_INVALID);
-                    }
-                } else {
-                    view_set_round(round);
-                    view_set_height(height);
-
-                    // We need to extract public key here but this is not working
-                    //extract_public_key();
-
+                if (!validation_reference_get()->IsInitialized) {
+                    view_set_msg_round(msg_round);
+                    view_set_msg_height(height);
                     view_display_validation_init();
                     *flags |= IO_ASYNCH_REPLY;
+                    THROW(APDU_CODE_DATA_INVALID);
+                    break;
+                }
+
+                if ((msg_round > validation_reference_get()->CurrentMsgRound)
+                    ||
+                    ((msg_round == validation_reference_get()->CurrentMsgRound)
+                     && height > validation_reference_get()->CurrentHeight)) {
+
+                    validation_reference_get()->CurrentMsgRound = msg_round;
+                    validation_reference_get()->CurrentHeight = height;
+                    view_set_state(msg_round, height);
+
+                    sign(tx);
+                } else {
+                    THROW(APDU_CODE_DATA_INVALID);
                 }
             }
                 break;
@@ -318,14 +298,11 @@ void reject_reference() {
     view_display_main_menu();
 }
 
-void accept_reference(int8_t round, int64_t height) {
+void accept_reference(int8_t msg_round, int64_t height) {
     validation_reference_get()->CurrentHeight = height;
-    validation_reference_get()->CurrentRound = round;
+    validation_reference_get()->CurrentMsgRound = msg_round;
     validation_reference_get()->IsInitialized = 1;
-
-    // TODO: Public key not implemented
-    strcpy((char*)public_key, "TODO");
-    view_set_pubic_key(public_key);
+    view_set_public_key("050b52687662f8ba73ed3f618a4d91c0d19d4a9ca5b966aa71f9523bc7d21f04");
 
     set_code(G_io_apdu_buffer, 0, APDU_CODE_OK);
     io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, 2);
@@ -340,32 +317,25 @@ void sign(volatile uint32_t *tx)
     uint8_t privateKeyData[32];
 
     unsigned int length = 0;
-    int result = 0;
-    switch (current_sigtype) {
-        case ED25519:
-            os_perso_derive_node_bip32(
-                    CX_CURVE_Ed25519,
-                    bip32_path, bip32_depth,
-                    privateKeyData, NULL);
 
-            keys_ed25519(&publicKey, &privateKey, privateKeyData);
-            memset(privateKeyData, 0, 32);
+    os_perso_derive_node_bip32(
+            CX_CURVE_Ed25519,
+            bip32_path, bip32_depth,
+            privateKeyData, NULL);
 
-            result = sign_ed25519(
-                    validation_get_buffer(),
-                    validation_get_buffer_length(),
-                    G_io_apdu_buffer,
-                    IO_APDU_BUFFER_SIZE,
-                    &length,
-                    &privateKey);
-            break;
-    }
+    keys_ed25519(&publicKey, &privateKey, privateKeyData);
+    memset(privateKeyData, 0, 32);
+
+    sign_ed25519(
+            validation_get_buffer(),
+            validation_get_buffer_length(),
+            G_io_apdu_buffer,
+            IO_APDU_BUFFER_SIZE,
+            &length,
+            &privateKey);
+
     *tx += length;
-    if (result == 1) {
-        THROW(APDU_CODE_OK);
-    } else {
-        THROW(APDU_CODE_SIGN_VERIFY_ERROR);
-    }
+    THROW(APDU_CODE_OK);
 }
 
 #pragma clang diagnostic push
